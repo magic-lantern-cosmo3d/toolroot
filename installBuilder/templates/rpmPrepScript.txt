@@ -1,0 +1,7 @@
+#
+# Template for "Prep" section of RPM spec files.
+#
+%prep
+
+%setup
+%patch

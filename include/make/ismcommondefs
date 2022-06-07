@@ -1,0 +1,100 @@
+# -*- Makefile -*-
+#
+#  Copyright (C) 2000  Wizzer Works Inc.
+#
+#  This Makefile is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation; either version 2 of the License, or
+#  any later version.
+#
+#  This Makefile is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this Makefile; if not, write to the Free Software
+#  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+#  For information concerning this Makefile, contact Mark S. Millard,
+#  of Wizzer Works Inc. at msm@wizzer.com.
+#
+#*************************************************************************
+#
+# ismcommondefs - Common build definitions and macros for ISMs
+#                 (Note: includes commondefs!)
+#
+# This file is the front-end to the system dependent ismcommondefs file.
+# This file contains definitions that should be common to all
+# Makefiles for a particular ISM.  This file automatically includes
+# 'commondefs' as well.  The ismcommondefs file adds definitions that
+# require an ISM-like structure to exist (e.g. ISM_DEPTH must be
+# defined for each Makefile).  Include ismcommondefs either in your
+# top level ismdefs file or individually in each Makefile.
+#
+# Note: to use this file, the following variables MUST be
+# defined before this file is (eventually) included:
+#
+#       PLATFORM
+#	WZDEV_DIR
+#	ISM_DEPTH
+#	ISM_NAME
+#	ISM_VERSION
+#	ISM_TIMEBOMB_DATE
+#
+# The build uses GNU make and a Bourne-compatible shell. All pathnames and
+# directories should be specified in UNIX style using the '/' separator
+# (drive letters can also be used).
+#
+# $Id: ismcommondefs,v 1.1 2004/05/26 19:17:30 msm Exp $
+#
+#*************************************************************************
+
+#
+# Set a defualt platform.
+#
+ifndef PLATFORM
+PLATFORM = linux
+endif
+
+#
+# Set a default development environment.
+#
+
+ifndef WZDEV_DIR
+#
+# Windows Platform
+#
+ifeq (win32,${PLATFORM})
+WZDEV_DIR = C:/wizzer
+endif
+
+#
+# Linux Platform
+#
+ifeq (linux,${PLATFORM})
+WZDEV_DIR = /usr/local/wizzer
+endif
+
+#
+# PowerTv Platform
+#
+ifeq (powertv,${PLATFORM})
+WZDEV_DIR = C:/wizzer
+endif
+endif
+
+#
+# Include platform specific ismcommondefs
+#
+ifeq (win32,${PLATFORM})
+include $(WZDEV_DIR)/include/make/win32/ismcommondefs
+endif
+
+ifeq (linux,${PLATFORM})
+include $(WZDEV_DIR)/include/make/linux/ismcommondefs
+endif
+
+ifeq (powertv,${PLATFORM})
+include $(WZDEV_DIR)/include/make/powertv/ismcommondefs
+endif

@@ -1,0 +1,75 @@
+<!DOCTYPE html PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<html version="3.0">
+<head>
+<link rel="stylesheet" type="text/css" href="../../../wz-style.css">
+<meta name="generator" content="HTML Tidy, see www.w3.org">
+<!-- Automatically generated HTML from man page source -->
+<title>ibVerifyCollection.pl Document</title>
+</head>
+<body bgcolor="#FFFFFF">
+<a href="http://www.wizzer.com/projects/index.htm">Wizzer Works Home Page</a> 
+: <a href="http://www.wizzer.com/projects/swengr/index.htm">Software Engineering</a> 
+: <a href="http://www.wizzer.com/projects/swengr/toolroot/index.htm">Toolroot</a> 
+: rpmList 
+<hr>
+
+<h3>rpmList.pl -- Perl Script for Creating a RPM BOM File</h3>
+
+<small>
+<p>
+Author: <b><i>Mark S. Millard</i></b><br>
+  Last Modified: <b><i>May 31, 2000</i></b> </p>
+</small>
+
+<hr>
+<dl> 
+  <dt><b>NAME</b></dt>
+  <p></p>
+  <dd><b>rpmList.pl</b> -- create a RPM BOM</dd>
+  <p></p>
+  <dt><b>SYNOPSIS</b></dt>
+  <p></p>
+  <dd><b>perl</b> rpmList.pl [-p] <i>package</i></dd>
+  <p></p>
+  <dt><b>DESCRIPTION</b></dt>
+  <p></p>
+  <dd>rpmList.pl dumps a bill-of-materials (BOM) listing for the specified <i>package</i>. 
+    The listing is in ASCII format. By default, the specified package should be 
+    an installed RPM package. 
+    <p><b>Options</b></p>
+    <dl> 
+      <dt><b>-p -</b> <i>package</i> is an uninstalled RPM package with a .rpm 
+        extension</dt>
+    </dl>
+  </dd>
+  <p></p>
+  <dt><b>DIAGNOSTICS</b> 
+    <blockquote> 
+      <p>rpmList.pl returns non-zero if there are any problems with listing the 
+        RPM package.</p>
+    </blockquote>
+    <p><b>EXAMPLES</b></p>
+  </dt>
+  <dd><b>perl rpmList.pl <i>wz_toolroot-base-0.5-1</i></b> 
+    <p>This example will dump a listing of the installed RPM package <i>wz_toolroot-base-0.5-1</i> 
+      to STDOUT.</p>
+  </dd>
+  <dd> <b>perl rpmDiff.pl -p <i>wz_toolroot-base-0.5-1.i386.rpm &gt; wz_toolroot.BOM</i></b></dd>
+  <dt>&nbsp;</dt>
+  <dd>This example will dump the uninstalled package file <i>wz_toolroot-0.5-1.i386.rpm</i> 
+    to the file <i>wz_toolroot.BOM</i>.</dd>
+  <dd> 
+    <p>&nbsp;</p>
+  </dd>
+  <p></p>
+  <dt><b>SEE ALSO</b></dt>
+  <p></p>
+  <dd><a href="installBuilder.html">InstallBuilder</a>, <a href="rpmDiff.html">rpmDiff</a></dd>
+</dl>
+<hr>
+<small> Last Published: <i>May 31, 2000</i><br>
+Contact: <a href="mailto:webmaster@wizzer.com">webmaster@wizzer.com</a>
+</small>
+
+</body>
+</html>

@@ -1,0 +1,704 @@
+%!PS-Adobe-3.0
+%%Creator: Adobe Illustrator exported by Sketch
+%%BoundingBox: 38 20 546 764
+%%HiResBoundingBox: 38 20.472 545.241 763.504
+%AI5_FileFormat 3
+%%EndComments
+%%BeginProlog
+%%EndProlog
+%%BeginSetup
+[45/minus
+144/dotlessi/grave/acute/circumflex/tilde/macron/breve/dotaccent/dieresis
+154/ring/cedilla
+157/hungarumlaut/ogonek/caron/space
+164/currency
+166/brokenbar
+168/dieresis/copyright/ordfeminine
+172/logicalnot/hyphen/registered/macron/degree/plusminus/twosuperior/threesuperior/acute/mu
+183/periodcentered/cedilla/onesuperior/ordmasculine
+188/onequarter/onehalf/threequarters
+192/Agrave/Aacute/Acircumflex/Atilde/Adieresis/Aring/AE/Ccedilla/Egrave/Eacute/Ecircumflex/Edieresis/Igrave/Iacute/Icircumflex/Idieresis/Eth/Ntilde/Ograve/Oacute/Ocircumflex/Otilde/Odieresis/multiply/Oslash/Ugrave/Uacute/Ucircumflex/Udieresis/Yacute/Thorn/germandbls/agrave/aacute/acircumflex/atilde/adieresis/aring/ae/ccedilla/egrave/eacute/ecircumflex/edieresis/igrave/iacute/icircumflex/idieresis/eth/ntilde/ograve/oacute/ocircumflex/otilde/odieresis/divide/oslash/ugrave/uacute/ucircumflex/udieresis/yacute/thorn/ydieresis TE
+%AI3_BeginEncoding: _Times-Roman Times-Roman
+[/_Times-Roman/Times-Roman 0 0 1 TZ
+%AI3_EndEncoding AdobeType
+%AI3_BeginEncoding: _Times-Bold Times-Bold
+[/_Times-Bold/Times-Bold 0 0 1 TZ
+%AI3_EndEncoding AdobeType
+%%EndSetup
+1 XR
+%AI5_BeginLayer
+1 1 1 1 0 0 -1 0 0 0 Lb
+(Layer 1) Ln
+0.000000 0.000000 0.000000 1.000000 k
+0 To
+1 0 0 1 40 702.604 0 Tp
+TP
+0 Tr
+/_Times-Roman 12 Tf
+(<Project>) Tx
+TO
+0 To
+1 0 0 1 60 682.604 0 Tp
+TP
+0 Tr
+/_Times-Roman 12 Tf
+(<Product1>) Tx
+TO
+0 To
+1 0 0 1 60 662.604 0 Tp
+TP
+0 Tr
+/_Times-Roman 12 Tf
+(<Product2>) Tx
+TO
+0 To
+1 0 0 1 80 642.604 0 Tp
+TP
+0 Tr
+/_Times-Roman 12 Tf
+(common) Tx
+TO
+0 To
+1 0 0 1 180 642.604 0 Tp
+TP
+0 Tr
+/_Times-Roman 12 Tf
+(linux) Tx
+TO
+0 To
+1 0 0 1 300 642.604 0 Tp
+TP
+0 Tr
+/_Times-Roman 12 Tf
+(nt4) Tx
+TO
+0 To
+1 0 0 1 379.336 642.604 0 Tp
+TP
+0 Tr
+/_Times-Roman 12 Tf
+(w98) Tx
+TO
+0 To
+1 0 0 1 419.336 642.604 0 Tp
+TP
+0 Tr
+/_Times-Roman 12 Tf
+(w2k) Tx
+TO
+0 To
+1 0 0 1 460 642.604 0 Tp
+TP
+0 Tr
+/_Times-Roman 12 Tf
+(mac) Tx
+TO
+0 To
+1 0 0 1 495.144 642.604 0 Tp
+TP
+0 Tr
+/_Times-Roman 12 Tf
+(<Target>) Tx
+TO
+0 To
+1 0 0 1 140 744.92 0 Tp
+TP
+0 Tr
+/_Times-Bold 24 Tf
+(The Project Directory Hierarchy) Tx
+TO
+0 To
+1 0 0 1 100 622.604 0 Tp
+TP
+0 Tr
+/_Times-Roman 12 Tf
+(src) Tx
+TO
+0 To
+1 0 0 1 120 582.604 0 Tp
+TP
+0 Tr
+/_Times-Roman 12 Tf
+(*.c) Tx
+TO
+0 To
+1 0 0 1 120 602.604 0 Tp
+TP
+0 Tr
+/_Times-Roman 12 Tf
+(*.h) Tx
+TO
+0 To
+1 0 0 1 100 562.604 0 Tp
+TP
+0 Tr
+/_Times-Roman 12 Tf
+(include) Tx
+TO
+0 To
+1 0 0 1 100 522.604 0 Tp
+TP
+0 Tr
+/_Times-Roman 12 Tf
+(doc) Tx
+TO
+0 To
+1 0 0 1 120 542.604 0 Tp
+TP
+0 Tr
+/_Times-Roman 12 Tf
+(*.h) Tx
+TO
+0 To
+1 0 0 1 200 622.604 0 Tp
+TP
+0 Tr
+/_Times-Roman 12 Tf
+(ismdefs) Tx
+TO
+0 To
+1 0 0 1 200 602.604 0 Tp
+TP
+0 Tr
+/_Times-Roman 12 Tf
+(ismrules) Tx
+TO
+0 To
+1 0 0 1 200 582.604 0 Tp
+TP
+0 Tr
+/_Times-Roman 12 Tf
+(Makefile) Tx
+TO
+0 To
+1 0 0 1 200 562.604 0 Tp
+TP
+0 Tr
+/_Times-Roman 12 Tf
+(src) Tx
+TO
+0 To
+1 0 0 1 220 542.604 0 Tp
+TP
+0 Tr
+/_Times-Roman 12 Tf
+(leafdefs) Tx
+TO
+0 To
+1 0 0 1 220 522.604 0 Tp
+TP
+0 Tr
+/_Times-Roman 12 Tf
+(*.h) Tx
+TO
+0 To
+1 0 0 1 220 502.604 0 Tp
+TP
+0 Tr
+/_Times-Roman 12 Tf
+(*.c) Tx
+TO
+0 To
+1 0 0 1 220 482.604 0 Tp
+TP
+0 Tr
+/_Times-Roman 12 Tf
+(Makefile) Tx
+TO
+0 To
+1 0 0 1 220 462.604 0 Tp
+TP
+0 Tr
+/_Times-Roman 12 Tf
+(release) Tx
+TO
+0 To
+1 0 0 1 240 442.604 0 Tp
+TP
+0 Tr
+/_Times-Roman 12 Tf
+(Makefile) Tx
+TO
+0 To
+1 0 0 1 220 422.604 0 Tp
+TP
+0 Tr
+/_Times-Roman 12 Tf
+(debug) Tx
+TO
+0 To
+1 0 0 1 240 402.604 0 Tp
+TP
+0 Tr
+/_Times-Roman 12 Tf
+(Makefile) Tx
+TO
+0 To
+1 0 0 1 220 382.604 0 Tp
+TP
+0 Tr
+/_Times-Roman 12 Tf
+(<Version>) Tx
+TO
+0 To
+1 0 0 1 200 362.604 0 Tp
+TP
+0 Tr
+/_Times-Roman 12 Tf
+(include) Tx
+TO
+0 To
+1 0 0 1 220 342.604 0 Tp
+TP
+0 Tr
+/_Times-Roman 12 Tf
+(*.h) Tx
+TO
+0 To
+1 0 0 1 200 322.604 0 Tp
+TP
+0 Tr
+/_Times-Roman 12 Tf
+(doc) Tx
+TO
+0 To
+1 0 0 1 200 302.604 0 Tp
+TP
+0 Tr
+/_Times-Roman 12 Tf
+(bin) Tx
+TO
+0 To
+1 0 0 1 200 282.604 0 Tp
+TP
+0 Tr
+/_Times-Roman 12 Tf
+(test) Tx
+TO
+0 To
+1 0 0 1 200 262.604 0 Tp
+TP
+0 Tr
+/_Times-Roman 12 Tf
+(dist) Tx
+TO
+0 To
+1 0 0 1 220 242.604 0 Tp
+TP
+0 Tr
+/_Times-Roman 12 Tf
+(spec.dat) Tx
+TO
+0 To
+1 0 0 1 220 222.604 0 Tp
+TP
+0 Tr
+/_Times-Roman 12 Tf
+(Makefile) Tx
+TO
+0 To
+1 0 0 1 220 202.604 0 Tp
+TP
+0 Tr
+/_Times-Roman 12 Tf
+(release) Tx
+TO
+0 To
+1 0 0 1 240 182.604 0 Tp
+TP
+0 Tr
+/_Times-Roman 12 Tf
+(collect.master) Tx
+TO
+0 To
+1 0 0 1 240 162.604 0 Tp
+TP
+0 Tr
+/_Times-Roman 12 Tf
+([collect.raw]) Tx
+TO
+0 To
+1 0 0 1 240 142.604 0 Tp
+TP
+0 Tr
+/_Times-Roman 12 Tf
+(Makefile) Tx
+TO
+0 To
+1 0 0 1 220 122.604 0 Tp
+TP
+0 Tr
+/_Times-Roman 12 Tf
+(debug) Tx
+TO
+0 To
+1 0 0 1 240 102.604 0 Tp
+TP
+0 Tr
+/_Times-Roman 12 Tf
+(collect.master) Tx
+TO
+0 To
+1 0 0 1 240 82.604 0 Tp
+TP
+0 Tr
+/_Times-Roman 12 Tf
+([collect.raw]) Tx
+TO
+0 To
+1 0 0 1 240 62.604 0 Tp
+TP
+0 Tr
+/_Times-Roman 12 Tf
+(Makefile) Tx
+TO
+0 To
+1 0 0 1 220 42.604 0 Tp
+TP
+0 Tr
+/_Times-Roman 12 Tf
+(<Version>) Tx
+TO
+0 To
+1 0 0 1 316.68 622.604 0 Tp
+TP
+0 Tr
+/_Times-Roman 12 Tf
+(ismdefs) Tx
+TO
+0 To
+1 0 0 1 316.68 602.604 0 Tp
+TP
+0 Tr
+/_Times-Roman 12 Tf
+(ismrules) Tx
+TO
+0 To
+1 0 0 1 316.68 582.604 0 Tp
+TP
+0 Tr
+/_Times-Roman 12 Tf
+(*.dsw) Tx
+TO
+0 To
+1 0 0 1 316.68 562.604 0 Tp
+TP
+0 Tr
+/_Times-Roman 12 Tf
+(*.dsp) Tx
+TO
+0 To
+1 0 0 1 316.68 542.604 0 Tp
+TP
+0 Tr
+/_Times-Roman 12 Tf
+(Makefile) Tx
+TO
+0 To
+1 0 0 1 316.68 522.604 0 Tp
+TP
+0 Tr
+/_Times-Roman 12 Tf
+(src) Tx
+TO
+0 To
+1 0 0 1 60 22.604 0 Tp
+TP
+0 Tr
+/_Times-Roman 12 Tf
+(<ProductN>) Tx
+TO
+0.000000 0.000000 0.000000 1.000000 K
+[] 0 d
+1.000000 w
+0 j
+0 J
+208.228 646.576 m
+295.606 646.576 L
+S
+401.356 646.005 m
+414.943 646.005 L
+S
+442.785 645.433 m
+454.991 645.433 L
+S
+482.104 645.679 m
+493.176 645.679 L
+S
+308.56 640.201 m
+308.56 524.1 L
+S
+315.033 626.042 m
+308.965 626.042 L
+S
+315.437 586.802 m
+308.965 586.802 L
+S
+315.437 565.362 m
+308.156 565.362 L
+S
+315.033 546.349 m
+308.156 546.349 L
+S
+314.224 525.314 m
+308.156 525.314 L
+S
+[%d %d ] 0 d
+389.871 640.201 m
+389.871 479.602 L
+S
+429.11 641.01 m
+429.11 479.602 L
+S
+468.35 639.391 m
+468.754 479.602 L
+S
+308.579 524.414 m
+308.579 478.702 L
+S
+[] 0 d
+308.701 605.76 m
+315.642 605.76 L
+S
+[%d %d ] 0 d
+322.82 519.783 m
+322.82 480 L
+S
+[] 0 d
+190.495 640.328 m
+190.495 264.942 L
+S
+206.182 560 m
+206.182 385.386 L
+S
+207.87 260.656 m
+207.87 46.5581 L
+S
+52.7882 700.328 m
+52.7882 700.328 L
+52.7882 26.558 L
+S
+89.1813 640.328 m
+89.1813 526.23 L
+S
+106.558 619.672 m
+106.558 619.672 L
+106.558 586.558 L
+S
+107.214 560 m
+107.214 546.886 L
+S
+106.634 608.014 m
+117.455 608.014 L
+S
+105.988 587.356 m
+117.783 587.356 L
+S
+88.9273 526.038 m
+98.4365 526.038 L
+S
+107.29 547.68 m
+117.455 547.68 L
+S
+190.577 625.721 m
+199.103 625.721 L
+S
+190.577 605.718 m
+198.775 605.718 L
+S
+190.577 586.7 m
+199.431 586.7 L
+S
+190.577 564.403 m
+199.103 564.403 L
+S
+52.53 686.383 m
+59.0881 686.383 L
+S
+52.8579 665.397 m
+59.416 665.397 L
+S
+205.943 546.04 m
+217.793 546.04 L
+S
+206.917 526.694 m
+217.793 526.694 L
+S
+206.594 505.708 m
+218.121 505.708 L
+S
+206.266 486.69 m
+218.777 486.69 L
+S
+206.592 464.72 m
+218.449 464.72 L
+S
+206.92 426.683 m
+218.121 426.683 L
+S
+229.926 447.013 m
+238.779 447.013 L
+S
+229.926 460.457 m
+229.926 446.357 L
+S
+88.5994 625.393 m
+98.7644 625.393 L
+S
+205.757 385.794 m
+218.26 385.794 L
+S
+190.577 366.349 m
+198.447 366.349 L
+S
+190.577 325.033 m
+198.775 325.033 L
+S
+190.577 306.015 m
+198.775 306.015 L
+S
+190.577 285.685 m
+198.775 285.685 L
+S
+190.249 265.355 m
+198.119 265.355 L
+S
+212.686 346.257 m
+217.932 346.257 L
+S
+212.219 360.119 m
+212.219 346.019 L
+S
+208.612 245.353 m
+217.465 245.353 L
+S
+207.956 226.006 m
+217.793 226.006 L
+S
+207.956 206.004 m
+218.449 206.004 L
+S
+207.956 125.012 m
+218.121 125.012 L
+S
+52.8579 26.9689 m
+58.7602 26.9689 L
+S
+229.598 200.102 m
+229.598 145.342 L
+S
+229.598 185.346 m
+238.451 185.346 L
+S
+229.598 165.344 m
+238.779 165.344 L
+S
+229.598 145.998 m
+239.107 145.998 L
+S
+230.254 119.766 m
+230.254 65.9894 L
+S
+207.628 46.6432 m
+217.465 46.6432 L
+S
+229.926 66.9732 m
+238.451 66.9732 L
+S
+230.254 85.0079 m
+239.107 85.0079 L
+S
+230.254 105.994 m
+238.451 105.994 L
+S
+230.493 420.656 m
+230.493 406.886 L
+S
+230.165 406.558 m
+237.705 406.558 L
+S
+71.4218 660.422 m
+71.4218 645.336 L
+S
+71.3068 645.375 m
+78.7714 645.375 L
+S
+124.21 646.108 m
+176.597 646.108 L
+S
+318.787 646.108 m
+376.054 646.108 L
+S
+98.3102 565.804 m
+89.1345 565.804 L
+S
+0 To
+1 0 0 1 320 340 0 Tp
+TP
+0 Tr
+/_Times-Roman 12 Tf
+(Key) Tx
+TO
+0 To
+1 0 0 1 360 322.604 0 Tp
+TP
+0 Tr
+/_Times-Roman 12 Tf
+(similar structure to linux hierarchy) Tx
+TO
+300 360 m
+540 360 L
+540 240 L
+300 240 L
+300 360 L
+s
+0 To
+1 0 0 1 360 302.604 0 Tp
+TP
+0 Tr
+/_Times-Roman 12 Tf
+(temporary file or directory) Tx
+TO
+0 To
+1 0 0 1 357.704 282.604 0 Tp
+TP
+0 Tr
+/_Times-Roman 12 Tf
+(directory extension as needed) Tx
+TO
+0 To
+1 0 0 1 360 262.604 0 Tp
+TP
+0 Tr
+/_Times-Roman 12 Tf
+(1 or more) Tx
+TO
+0 To
+1 0 0 1 320 262.604 0 Tp
+TP
+0 Tr
+/_Times-Roman 12 Tf
+(*) Tx
+TO
+0 To
+1 0 0 1 320 302.604 0 Tp
+TP
+0 Tr
+/_Times-Roman 12 Tf
+([]) Tx
+TO
+0 To
+1 0 0 1 320 282.604 0 Tp
+TP
+0 Tr
+/_Times-Roman 12 Tf
+(<>) Tx
+TO
+[%d %d ] 0 d
+320 320 m
+340 320 L
+S
+LB
+%AI5_EndLayer--
+%%Trailer
+%%EOF

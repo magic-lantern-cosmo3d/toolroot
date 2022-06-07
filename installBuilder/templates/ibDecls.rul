@@ -1,0 +1,63 @@
+/*---------------------------------------------------------------------------*\
+ *
+ *  Copyright (C) 2000  Wizzer Works Inc.
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ *  For information concerning this program, contact Mark S. Millard,
+ *  of Wizzer Works Inc. at msm@wizzer.com.
+ *
+ *  File Name:  ibDecls.RUL
+ *
+ *  Description:
+ *      Declaration part of an InstallShield Script for the Install Builder.
+ *      (heavily based on the InstallShield SDK Edition Template One script.)
+ *      This script has NOT been tested on Windows 95.
+ *
+ *  Author:  Mark Millard                    Date:  4/13/00
+ *           InstallShield Corporation       Date:  1-10-96
+ *
+ *  Comments:
+ *      This script should be included by the Install Builder's setup.rul.
+ *      It declares the variables & functions used by ibBody.rul
+ *
+ *
+\*---------------------------------------------------------------------------*/
+
+#define BASE_REGISTRYNT         "Software\\Microsoft\\Windows NT\\CurrentVersion\\App Paths\\"
+#define BASE_REGISTRY95         "Software\\Microsoft\\Windows\\CurrentVersion\\App Paths\\"
+
+        // Global variable declarations.
+        STRING  svGrp, szMsg, szFileSet, szTitle, szAppPath, szAppSharedDir;
+        STRING  szProgram, szTemp, svUninstLogFile, szRegKey;
+        STRING  svMainDirectory[ _MAX_STRING ];
+        BOOL    bSpaceOk, bReshowSetupType;
+        NUMBER  nResult, nStatusId, nType;
+
+        BOOL    bWinNT, bShellExplorer;
+
+        // Function declarations.
+        prototype SetupScreen();
+        prototype CheckRequirements();
+        prototype CheckSpaceRequirements( string );
+        prototype CreateRegDBEntries();
+        prototype CheckNotAlreadyInstalled();
+
+        // error handling
+        STRING svErrorString;
+
+        // effects: sets svErrorString to the a string representation of errno
+        //          or "*unknown error*" if not known.
+        prototype SetErrorString( number );

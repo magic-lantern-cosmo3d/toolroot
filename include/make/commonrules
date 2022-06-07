@@ -1,0 +1,82 @@
+# -*- Makefile -*-
+#
+#  Copyright (C) 2000  Wizzer Works Inc.
+#
+#  This Makefile is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation; either version 2 of the License, or
+#  any later version.
+#
+#  This Makefile is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this Makefile; if not, write to the Free Software
+#  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+#  For information concerning this Makefile, contact Mark S. Millard,
+#  of Wizzer Works Inc. at msm@wizzer.com.
+#
+#*************************************************************************
+#
+# commonrules - Common build rules.
+#
+# This file is the front-end to the system dependent commonrules file.
+# Makefiles must include commondefs and include $(COMMONRULES) AFTER the
+# first target is defined. See the commondefs file for detailed information.
+#
+# $Id: commonrules,v 1.1 2004/05/26 19:17:30 msm Exp $
+#
+#*************************************************************************
+
+#
+# Set a defualt platform.
+#
+ifndef PLATFORM
+PLATFORM = linux
+endif
+
+#
+# Set a default development environment.
+#
+
+ifndef WZDEV_DIR
+#
+# Windows Platform
+#
+ifeq (win32,${PLATFORM})
+WZDEV_DIR = C:/wizzer
+endif
+
+#
+# Linux Platform
+#
+ifeq (linux,${PLATFORM})
+WZDEV_DIR = /usr/local/wizzer
+endif
+
+#
+# PowerTv Platform
+#
+ifeq (powertv,${PLATFORM})
+WZDEV_DIR = C:/wizzer
+endif
+endif
+
+
+#
+# Include platform specific commonrules.
+#
+ifeq (win32,${PLATFORM})
+include $(WZDEV_DIR)/include/make/win32/commonrules
+endif
+
+ifeq (linux,${PLATFORM})
+include $(WZDEV_DIR)/include/make/linux/commonrules
+endif
+
+ifeq (powertv,${PLATFORM})
+include $(WZDEV_DIR)/include/make/powertv/commonrules
+endif

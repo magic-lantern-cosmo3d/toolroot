@@ -1,0 +1,473 @@
+# -*- Makefile -*-
+#
+#  Copyright (C) 2000  Wizzer Works Inc.
+#
+#  This Makefile is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation; either version 2 of the License, or
+#  any later version.
+#
+#  This Makefile is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this Makefile; if not, write to the Free Software
+#  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+#  For information concerning this Makefile, contact Mark S. Millard,
+#  of Wizzer Works Inc. at msm@wizzer.com.
+#
+#*************************************************************************
+#
+# configurations - Common build configurations
+#
+# Makefiles define CONFIGURATION to be one of the configurations below.
+# This file is automatically included into Makefiles via commondefs.
+#
+# $Id: configurations,v 1.1 2004/05/26 19:17:31 msm Exp $
+#
+#*************************************************************************
+
+# they're the same..
+ifeq ($(DEBUG_INFO),PDB)
+CF_DEBUG_PDB		=  -Fd"$(basename $(word 1,$(TARGETS))).pdb"
+CF_RELEASE_PDB		=  -Fd"$(basename $(word 1,$(TARGETS))).pdb"
+# generate debug info in PDB file:
+CF_GEN_DEBUG_INFO	=  -Zi
+CF_GEN_DEBUG_LDINFO	=  -debug
+else
+
+ifeq ($(DEBUG_INFO),BUILTIN)
+CF_DEBUG_PDB		=  
+CF_RELEASE_PDB		=  
+# generate debug info in lib, exe, or dll:
+CF_GEN_DEBUG_INFO	=  -Z7
+CF_GEN_DEBUG_LDINFO	=  -debug
+endif
+
+endif
+
+CF_DEBUG_POSTFIX	= d
+
+# Disable optimizations
+CF_DEBUG_OPTIMIZER	= -Od $(CF_DEBUG_PDB)
+# Maximize for speed
+CF_RELEASE_OPTIMIZER	= -O2 $(CF_RELEASE_PDB)
+
+CF_DEBUG_DEFS		= -D"DEBUG" -D"_DEBUG"
+CF_RELEASE_DEFS		= -D"NDEBUG"
+
+CF_STD_LIBS	= kernel32.lib \
+		  user32.lib \
+		  gdi32.lib \
+		  winspool.lib \
+		  comdlg32.lib \
+		  advapi32.lib \
+		  shell32.lib \
+		  ole32.lib \
+		  oleaut32.lib \
+		  uuid.lib \
+		  odbc32.lib \
+		  odbccp32.lib \
+		  $(NULL)
+
+#
+# There are three different flavors of the C runtime library. The
+# configuration selected determines an appropriate libc style. To
+# override the selection, define LIBC_STYLE with the compiler switch
+# for the style of libc desired (e.g. -ML, -MT, -MD) and override
+# LIBC_STYLE_DEFS with the appropriate defines (e.g. -D"_MT").
+#
+CF_STATIC_SINGLE_LIBC	= -ML
+CF_STATIC_SINGLE_DEFS   =
+CF_STATIC_THREAD_LIBC	= -MT
+CF_STATIC_THREAD_DEFS	= -D"_MT"
+CF_DLL_THREAD_LIBC	= -MD
+CF_DLL_THREAD_DEFS	= -D"_MT" -D"_DLL"
+
+#
+# By default the configurations are builts using multibyte characters
+# and functions. To build under unicode define WIN_UNICODE to anything.
+#
+ifndef WIN_UNICODE
+CF_CHARS = -D"_MBCS"
+else
+CF_CHARS = -D"_UNICODE"
+endif
+
+#
+# To override strict Windows type checking, define WIN_STRICT to
+# be empty.
+#
+WIN_STRICT = -D"STRICT"
+
+#
+# GenericRelease, GenericDebug
+#
+# This is the most basic format. Use this only for builds that have
+# no Windows/MFC dependencies. Console apps should use ConsoleRelease/Debug
+# instead of this configuration.
+#
+ifeq ($(CONFIGURATION),GenericRelease)
+LIBC_STYLE	=
+LIBC_STYLE_DEFS =
+PCH_OPTS	=
+CONFIG_COPTS	= $(CF_RELEASE_OPTIMIZER)
+CONFIG_CDEFS	= $(CF_RELEASE_DEFS)
+CONFIG_LDOPTS	= $(CF_GEN_DEBUG_LDINFO)
+CONFIG_LDLIBS	=
+CONFIG_DIRT	=
+CONFIG_TDIRT	=
+endif
+
+ifeq ($(CONFIGURATION),GenericDebug)
+LIBC_STYLE	=
+LIBC_STYLE_DEFS =
+PCH_OPTS	=
+CONFIG_COPTS	= $(CF_DEBUG_OPTIMIZER)
+CONFIG_CDEFS	= $(CF_DEBUG_DEFS)
+CONFIG_LDOPTS	= -debug
+CONFIG_LDLIBS	=
+CONFIG_DIRT	=
+CONFIG_TDIRT	=
+endif
+
+#
+# ConsoleRelease, ConsoleDebug
+#
+# Typical configuration for a non-graphical application.
+#
+ifeq ($(CONFIGURATION),ConsoleRelease)
+LIBC_STYLE	= $(CF_DLL_THREAD_LIBC)
+LIBC_STYLE_DEFS = $(CF_DLL_THREAD_DEFS)
+PCH_OPTS	= -YX -Fp"$(basename $(word 1,$(TARGETS))).pch"
+CONFIG_COPTS	= $(CF_RELEASE_OPTIMIZER) $(CF_GEN_DEBUG_INFO)
+CONFIG_CDEFS	= $(CF_RELEASE_DEFS) $(LIBC_STYLE_DEFS) -D"_CONSOLE" $(WIN_STRICT)
+CONFIG_LDOPTS	= $(CF_GEN_DEBUG_LDINFO) -subsystem:console
+CONFIG_LDLIBS	= $(CF_STD_LIBS)
+CONFIG_DIRT	= $(foreach targ,$(TARGETS),$(basename $(targ)).exp) \
+		  $(foreach targ,$(TARGETS),$(basename $(targ)).bsc) \
+		  $(foreach targ,$(TARGETS),$(basename $(targ)).pch)
+CONFIG_TDIRT	= $(foreach targ,$(TARGETS),$(basename $(targ)).lib)
+endif
+
+ifeq ($(CONFIGURATION),ConsoleDebug)
+LIBC_STYLE	= $(CF_DLL_THREAD_LIBC)$(CF_DEBUG_POSTFIX)
+LIBC_STYLE_DEFS = $(CF_DLL_THREAD_DEFS)
+PCH_OPTS	= -YX -Fp"$(basename $(word 1,$(TARGETS))).pch"
+CONFIG_COPTS	= $(CF_DEBUG_OPTIMIZER) $(CF_GEN_DEBUG_INFO)
+CONFIG_CDEFS	= $(CF_DEBUG_DEFS) $(LIBC_STYLE_DEFS) -D"_CONSOLE" $(WIN_STRICT)
+CONFIG_LDOPTS	= -debug -subsystem:console
+CONFIG_LDLIBS	= $(CF_STD_LIBS)
+CONFIG_DIRT	= $(foreach targ,$(TARGETS),$(basename $(targ)).exp) \
+		  $(foreach targ,$(TARGETS),$(basename $(targ)).bsc) \
+		  $(foreach targ,$(TARGETS),$(basename $(targ)).pch)
+CONFIG_TDIRT	= $(foreach targ,$(TARGETS),$(basename $(targ)).lib) \
+		  $(foreach targ,$(TARGETS),$(basename $(targ)).pdb)
+endif
+
+#
+# Win32Release, Win32Debug
+#
+# Typical configuration for a non-MFC graphical application.
+#
+ifeq ($(CONFIGURATION),Win32Release)
+LIBC_STYLE	= $(CF_DLL_THREAD_LIBC)
+LIBC_STYLE_DEFS = $(CF_DLL_THREAD_DEFS)
+PCH_OPTS	= -YX -Fp"$(basename $(word 1,$(TARGETS))).pch"
+CONFIG_COPTS	= $(CF_RELEASE_OPTIMIZER) $(CF_GEN_DEBUG_INFO)
+CONFIG_CDEFS	= $(CF_RELEASE_DEFS) $(LIBC_STYLE_DEFS) -D"_WINDOWS" $(WIN_STRICT)
+CONFIG_LDOPTS	= $(CF_GEN_DEBUG_LDINFO) -subsystem:windows
+CONFIG_LDLIBS	= $(CF_STD_LIBS)
+CONFIG_DIRT	= $(foreach targ,$(TARGETS),$(basename $(targ)).exp) \
+		  $(foreach targ,$(TARGETS),$(basename $(targ)).bsc)
+CONFIG_TDIRT	= $(foreach targ,$(TARGETS),$(basename $(targ)).lib)
+endif
+
+ifeq ($(CONFIGURATION),Win32Debug)
+LIBC_STYLE	= $(CF_DLL_THREAD_LIBC)$(CF_DEBUG_POSTFIX)
+LIBC_STYLE_DEFS = $(CF_DLL_THREAD_DEFS)
+PCH_OPTS	= -YX -Fp"$(basename $(word 1,$(TARGETS))).pch"
+CONFIG_COPTS	= $(CF_DEBUG_OPTIMIZER) $(CF_GEN_DEBUG_INFO)
+CONFIG_CDEFS	= $(CF_DEBUG_DEFS) $(LIBC_STYLE_DEFS) -D"_WINDOWS" $(WIN_STRICT)
+CONFIG_LDOPTS	= -debug -subsystem:windows
+CONFIG_LDLIBS	= $(CF_STD_LIBS)
+CONFIG_DIRT	= $(foreach targ,$(TARGETS),$(basename $(targ)).exp) \
+		  $(foreach targ,$(TARGETS),$(basename $(targ)).bsc)
+CONFIG_TDIRT	= $(foreach targ,$(TARGETS),$(basename $(targ)).lib)
+endif
+
+#
+# LibRelease, LibDebug
+#
+# Typical configuration for a non-MFC static library built with LIB.
+#
+ifeq ($(CONFIGURATION),LibRelease)
+LIBC_STYLE	= $(CF_DLL_THREAD_LIBC)
+LIBC_STYLE_DEFS = $(CF_DLL_THREAD_DEFS)
+PCH_OPTS	= -YX -Fp"$(basename $(word 1,$(TARGETS))).pch"
+CONFIG_COPTS	= $(CF_RELEASE_OPTIMIZER) $(CF_GEN_DEBUG_INFO)
+CONFIG_CDEFS	= $(CF_RELEASE_DEFS) $(LIBC_STYLE_DEFS) -D"_WINDOWS" $(WIN_STRICT)
+CONFIG_LDOPTS	=
+CONFIG_LDLIBS	=
+CONFIG_DIRT	= $(foreach targ,$(TARGETS),$(basename $(targ)).exp) \
+		  $(foreach targ,$(TARGETS),$(basename $(targ)).bsc)
+CONFIG_TDIRT	=
+endif
+
+ifeq ($(CONFIGURATION),LibDebug)
+LIBC_STYLE	= $(CF_DLL_THREAD_LIBC)$(CF_DEBUG_POSTFIX)
+LIBC_STYLE_DEFS = $(CF_DLL_THREAD_DEFS)
+PCH_OPTS	= -YX -Fp"$(basename $(word 1,$(TARGETS))).pch"
+CONFIG_COPTS	= $(CF_DEBUG_OPTIMIZER) $(CF_GEN_DEBUG_INFO)
+CONFIG_CDEFS	= $(CF_DEBUG_DEFS) $(LIBC_STYLE_DEFS) -D"_WINDOWS" $(WIN_STRICT)
+CONFIG_LDOPTS	=
+CONFIG_LDLIBS	=
+CONFIG_DIRT	= $(foreach targ,$(TARGETS),$(basename $(targ)).exp) \
+		  $(foreach targ,$(TARGETS),$(basename $(targ)).bsc)
+CONFIG_TDIRT	=
+endif
+
+#
+# DllRelease, DllDebug
+#
+# Typical configuration for a non-MFC graphical or
+# non-graphical DLL.
+#
+ifeq ($(CONFIGURATION),DllRelease)
+LIBC_STYLE	= $(CF_DLL_THREAD_LIBC)
+LIBC_STYLE_DEFS = $(CF_DLL_THREAD_DEFS)
+PCH_OPTS	= -YX -Fp"$(basename $(word 1,$(TARGETS))).pch"
+CONFIG_COPTS	= $(CF_RELEASE_OPTIMIZER) $(CF_GEN_DEBUG_INFO)
+CONFIG_CDEFS	= $(CF_RELEASE_DEFS) $(LIBC_STYLE_DEFS) -D"_WINDOWS" $(WIN_STRICT)
+CONFIG_LDOPTS	= $(CF_GEN_DEBUG_LDINFO) -subsystem:windows -dll
+CONFIG_LDLIBS	= $(CF_STD_LIBS)
+CONFIG_DIRT	= $(foreach targ,$(TARGETS),$(basename $(targ)).exp) \
+		  $(foreach targ,$(TARGETS),$(basename $(targ)).bsc) \
+		  $(foreach targ,$(TARGETS),$(basename $(targ)).pch)
+CONFIG_TDIRT	= $(foreach targ,$(TARGETS),$(basename $(targ)).lib) \
+		  $(foreach targ,$(TARGETS),$(basename $(targ)).pdb)
+endif
+
+ifeq ($(CONFIGURATION),DllDebug)
+LIBC_STYLE	= $(CF_DLL_THREAD_LIBC)$(CF_DEBUG_POSTFIX)
+LIBC_STYLE_DEFS = $(CF_DLL_THREAD_DEFS)
+PCH_OPTS	= -YX -Fp"$(basename $(word 1,$(TARGETS))).pch"
+CONFIG_COPTS	= $(CF_DEBUG_OPTIMIZER) $(CF_GEN_DEBUG_INFO)
+CONFIG_CDEFS	= $(CF_DEBUG_DEFS) $(LIBC_STYLE_DEFS) -D"_WINDOWS" $(WIN_STRICT)
+CONFIG_LDOPTS	= -debug -subsystem:windows -dll
+CONFIG_LDLIBS	= $(CF_STD_LIBS)
+CONFIG_DIRT	= $(foreach targ,$(TARGETS),$(basename $(targ)).exp) \
+		  $(foreach targ,$(TARGETS),$(basename $(targ)).bsc) \
+		  $(foreach targ,$(TARGETS),$(basename $(targ)).pch)
+CONFIG_TDIRT	= $(foreach targ,$(TARGETS),$(basename $(targ)).lib) \
+		  $(foreach targ,$(TARGETS),$(basename $(targ)).pdb)
+endif
+
+#
+# ResourceDllDebug, ResourceDllRelease
+#
+# Typical configuration for a Resource-Only DLL
+#
+
+ifeq ($(CONFIGURATION),ResourceDllRelease)
+LIBC_STYLE	= $(CF_DLL_THREAD_LIBC)
+LIBC_STYLE_DEFS = $(CF_DLL_THREAD_DEFS)
+PCH_OPTS	= 
+CONFIG_COPTS	= $(CF_RELEASE_OPTIMIZER)
+CONFIG_CDEFS	= $(CF_RELEASE_DEFS) $(LIBC_STYLE_DEFS) -D"_WINDOWS" $(WIN_STRICT)
+CONFIG_LDOPTS	= $(CF_GEN_DEBUG_LDINFO) -dll -noentry
+CONFIG_LDLIBS	= 
+CONFIG_DIRT	= $(foreach targ,$(TARGETS),$(basename $(targ)).exp) \
+		  $(foreach targ,$(TARGETS),$(basename $(targ)).bsc)
+CONFIG_TDIRT	= $(foreach targ,$(TARGETS),$(basename $(targ)).lib) \
+		  $(foreach targ,$(TARGETS),$(basename $(targ)).pdb)
+endif
+
+ifeq ($(CONFIGURATION),ResourceDllDebug)
+LIBC_STYLE	= $(CF_DLL_THREAD_LIBC)$(CF_DEBUG_POSTFIX)
+LIBC_STYLE_DEFS = $(CF_DLL_THREAD_DEFS)
+PCH_OPTS	= 
+CONFIG_COPTS	= $(CF_DEBUG_OPTIMIZER)
+CONFIG_CDEFS	= $(CF_DEBUG_DEFS) $(LIBC_STYLE_DEFS) -D"_WINDOWS" $(WIN_STRICT)
+CONFIG_LDOPTS	= -debug -dll -noentry
+CONFIG_LDLIBS	= 
+CONFIG_DIRT	= $(foreach targ,$(TARGETS),$(basename $(targ)).exp) \
+		  $(foreach targ,$(TARGETS),$(basename $(targ)).bsc)
+CONFIG_TDIRT	= $(foreach targ,$(TARGETS),$(basename $(targ)).lib) \
+		  $(foreach targ,$(TARGETS),$(basename $(targ)).pdb)
+endif
+
+#
+# MfcLibRelease, MfcLibDebug
+#
+# Typical configuration for an MFC static library that
+# will use the MFC DLL when linked with the app.
+#
+ifeq ($(CONFIGURATION),MfcLibRelease)
+LIBC_STYLE	= $(CF_DLL_THREAD_LIBC)
+LIBC_STYLE_DEFS = $(CF_DLL_THREAD_DEFS)
+PCH_OPTS	=
+CONFIG_COPTS	= $(CF_RELEASE_OPTIMIZER) $(CF_GEN_DEBUG_INFO)
+CONFIG_CDEFS	= $(CF_RELEASE_DEFS) $(LIBC_STYLE_DEFS) -D"_WINDOWS" \
+		  -D"_WINDLL" -D"_AFXDLL" $(CF_CHARS) -D"_USRDLL" \
+		  $(WIN_STRICT)
+CONFIG_LDOPTS	=
+CONFIG_LDLIBS	=
+CONFIG_DIRT	= $(foreach targ,$(TARGETS),$(basename $(targ)).exp) \
+		  $(foreach targ,$(TARGETS),$(basename $(targ)).bsc)
+CONFIG_TDIRT	= $(foreach targ,$(TARGETS),$(basename $(targ)).lib)
+endif
+
+ifeq ($(CONFIGURATION),MfcLibDebug)
+LIBC_STYLE	= $(CF_DLL_THREAD_LIBC)$(CF_DEBUG_POSTFIX)
+LIBC_STYLE_DEFS = $(CF_DLL_THREAD_DEFS)
+PCH_OPTS	=
+CONFIG_COPTS	= $(CF_DEBUG_OPTIMIZER) $(CF_GEN_DEBUG_INFO)
+CONFIG_CDEFS	= $(CF_DEBUG_DEFS) $(LIBC_STYLE_DEFS) -D"_WINDOWS" \
+		  -D"_WINDLL" -D"_AFXDLL" $(CF_CHARS) -D"_USRDLL" \
+		  $(WIN_STRICT)
+CONFIG_LDOPTS	=
+CONFIG_LDLIBS	=
+CONFIG_DIRT	= $(foreach targ,$(TARGETS),$(basename $(targ)).exp) \
+		  $(foreach targ,$(TARGETS),$(basename $(targ)).bsc)
+CONFIG_TDIRT	= $(foreach targ,$(TARGETS),$(basename $(targ)).lib) \
+		  $(foreach targ,$(TARGETS),$(basename $(targ)).pdb)
+endif
+
+#
+# MfcExtDllRelease, MfcExtDllDebug
+#
+# For backwards compatibility: MfcDllRelease, MfcDllDebug
+#
+# Typical configuration for an MFC DLL. This
+# configuraton creates and MFC extension DLL.
+# Do not use this if DLL will link with different
+# versions of MFC from the caller, if DLL is to
+# be called from non-MFC apps, or if the DLL
+# contains an OLE control.
+#
+ifeq ($(CONFIGURATION),MfcDllRelease)
+CONFIGURATION = MfcExtDllRelease
+endif
+ifeq ($(CONFIGURATION),MfcDllDebug)
+CONFIGURATION = MfcExtDllDebug
+endif
+
+ifeq ($(CONFIGURATION),MfcExtDllRelease)
+LIBC_STYLE	= $(CF_DLL_THREAD_LIBC)
+LIBC_STYLE_DEFS = $(CF_DLL_THREAD_DEFS)
+PCH_OPTS	=
+CONFIG_COPTS	= $(CF_RELEASE_OPTIMIZER) $(CF_GEN_DEBUG_INFO)
+CONFIG_CDEFS	= $(CF_RELEASE_DEFS) $(LIBC_STYLE_DEFS) -D"_WINDOWS" \
+		  -D"_WINDLL" -D"_AFXDLL" $(CF_CHARS) -D"_AFXEXT" \
+		  $(WIN_STRICT)
+CONFIG_LDOPTS	= $(CF_GEN_DEBUG_LDINFO) -subsystem:windows -dll
+CONFIG_LDLIBS	=
+CONFIG_DIRT	= $(foreach targ,$(TARGETS),$(basename $(targ)).exp) \
+		  $(foreach targ,$(TARGETS),$(basename $(targ)).bsc)
+CONFIG_TDIRT	= $(foreach targ,$(TARGETS),$(basename $(targ)).lib) \
+		  $(foreach targ,$(TARGETS),$(basename $(targ)).pdb)
+endif
+
+ifeq ($(CONFIGURATION),MfcExtDllDebug)
+LIBC_STYLE	= $(CF_DLL_THREAD_LIBC)$(CF_DEBUG_POSTFIX)
+LIBC_STYLE_DEFS = $(CF_DLL_THREAD_DEFS)
+PCH_OPTS	=
+CONFIG_COPTS	= $(CF_DEBUG_OPTIMIZER) $(CF_GEN_DEBUG_INFO)
+CONFIG_CDEFS	= $(CF_DEBUG_DEFS) $(LIBC_STYLE_DEFS) -D"_WINDOWS" \
+		  -D"_WINDLL" -D"_AFXDLL" $(CF_CHARS) -D"_AFXEXT" \
+		  $(WIN_STRICT)
+CONFIG_LDOPTS	= -debug -subsystem:windows -dll
+CONFIG_LDLIBS	=
+CONFIG_DIRT	= $(foreach targ,$(TARGETS),$(basename $(targ)).exp) \
+		  $(foreach targ,$(TARGETS),$(basename $(targ)).bsc)
+CONFIG_TDIRT	= $(foreach targ,$(TARGETS),$(basename $(targ)).lib) \
+		  $(foreach targ,$(TARGETS),$(basename $(targ)).pdb)
+endif
+
+#
+# MfcRegDllRelease, MfcRegDllDebug
+#
+# Configuration for an MFC "Regular" DLL. This configuration
+# should be used if the DLL will be called by non-MFC apps,
+# for creating OLE controls, and for DLL's that will link
+# with a different version of MFC than the caller. MFC objects
+# cannot be passed between caller and this type of DLL.
+#
+ifeq ($(CONFIGURATION),MfcRegDllRelease)
+LIBC_STYLE	= $(CF_DLL_THREAD_LIBC)
+LIBC_STYLE_DEFS = $(CF_DLL_THREAD_DEFS)
+PCH_OPTS	=
+CONFIG_COPTS	= $(CF_RELEASE_OPTIMIZER) $(CF_GEN_DEBUG_INFO)
+CONFIG_CDEFS	= $(CF_RELEASE_DEFS) $(LIBC_STYLE_DEFS) -D"_WINDOWS" \
+		  -D"_WINDLL" -D"_AFXDLL" $(CF_CHARS) -D"_USRDLL" \
+		  $(WIN_STRICT)
+CONFIG_LDOPTS	= $(CF_GEN_DEBUG_LDINFO) -subsystem:windows -dll
+CONFIG_LDLIBS	=
+CONFIG_DIRT	= $(foreach targ,$(TARGETS),$(basename $(targ)).exp)
+CONFIG_TDIRT	= $(foreach targ,$(TARGETS),$(basename $(targ)).lib)
+endif
+
+ifeq ($(CONFIGURATION),MfcRegDllDebug)
+LIBC_STYLE	= $(CF_DLL_THREAD_LIBC)$(CF_DEBUG_POSTFIX)
+LIBC_STYLE_DEFS = $(CF_DLL_THREAD_DEFS)
+PCH_OPTS	=
+CONFIG_COPTS	= $(CF_DEBUG_OPTIMIZER) $(CF_GEN_DEBUG_INFO)
+CONFIG_CDEFS	= $(CF_DEBUG_DEFS) $(LIBC_STYLE_DEFS) -D"_WINDOWS" \
+		  -D"_WINDLL" -D"_AFXDLL" $(CF_CHARS) -D"_USRDLL" \
+		  $(WIN_STRICT)
+CONFIG_LDOPTS	= -debug -subsystem:windows -dll
+CONFIG_LDLIBS	=
+CONFIG_DIRT	= $(foreach targ,$(TARGETS),$(basename $(targ)).exp)
+CONFIG_TDIRT	= $(foreach targ,$(TARGETS),$(basename $(targ)).lib)
+endif
+
+#
+# MfcAppRelease, MfcAppDebug
+#
+# Typical configuration for an MFC application.
+#
+ifeq ($(CONFIGURATION),MfcAppRelease)
+LIBC_STYLE	= $(CF_DLL_THREAD_LIBC)
+LIBC_STYLE_DEFS = $(CF_DLL_THREAD_DEFS)
+PCH_OPTS	=
+CONFIG_COPTS	= $(CF_RELEASE_OPTIMIZER) $(CF_GEN_DEBUG_INFO)
+CONFIG_CDEFS	= $(CF_RELEASE_DEFS) $(LIBC_STYLE_DEFS) -D"_WINDOWS" \
+		  -D"_AFXDLL" $(CF_CHARS) \
+		  $(WIN_STRICT)
+CONFIG_LDOPTS	= $(CF_GEN_DEBUG_LDINFO) -subsystem:windows
+CONFIG_LDLIBS	=
+CONFIG_DIRT	= $(foreach targ,$(TARGETS),$(basename $(targ)).bsc)
+CONFIG_TDIRT	= $(foreach targ,$(TARGETS),$(basename $(targ)).pdb)
+endif
+
+ifeq ($(CONFIGURATION),MfcAppDebug)
+LIBC_STYLE	= $(CF_DLL_THREAD_LIBC)$(CF_DEBUG_POSTFIX)
+LIBC_STYLE_DEFS = $(CF_DLL_THREAD_DEFS)
+PCH_OPTS	=
+CONFIG_COPTS	= $(CF_DEBUG_OPTIMIZER) $(CF_GEN_DEBUG_INFO)
+CONFIG_CDEFS	= $(CF_DEBUG_DEFS) $(LIBC_STYLE_DEFS) -D"_WINDOWS" \
+		  -D"_AFXDLL" $(CF_CHARS) \
+		  $(WIN_STRICT)
+CONFIG_LDOPTS	= -debug -subsystem:windows
+CONFIG_LDLIBS	=
+CONFIG_DIRT	= $(foreach targ,$(TARGETS),$(basename $(targ)).bsc)
+CONFIG_TDIRT	= $(foreach targ,$(TARGETS),$(basename $(targ)).pdb)
+endif
+
+#
+#
+# Put configuration settings, if any, into mainstream build
+#
+ifdef CONFIG_COPTS
+GCCOMOPTS	+= $(LIBC_STYLE) $(CONFIG_COPTS)
+GCCOMDEFS	+= $(CONFIG_CDEFS)
+GRCDEFS		+= $(CONFIG_CDEFS)
+GLDOPTS		+= $(CONFIG_LDOPTS)
+GLDLIBS		+= $(CONFIG_LDLIBS)
+GDIRT		+= $(CONFIG_DIRT)
+GTDIRT		+= $(CONFIG_TDIRT)
+endif

@@ -1,0 +1,6 @@
+#
+# %install section of RPM spec file.
+#
+%install
+
+echo "Nothing to install for this product."

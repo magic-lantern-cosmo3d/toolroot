@@ -1,0 +1,6 @@
+#
+# Template for "Build" section of RPM spec files.
+#
+%build
+
+make

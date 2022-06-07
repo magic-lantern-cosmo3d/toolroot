@@ -1,0 +1,28 @@
+NOCLASS
+
+NAME ibVerifyCollection.pl { compare a candidate collection file
+against a master }
+
+SYNOPSIS {
+	perl ibVerifyCollection.pl master candidate
+}
+
+DESC {
+<C>ibVerifyCollection.pl</C> compares a candidate collection file
+against a master, reporting what entries missing from the candidate or
+extra in the candidate.  Any entries in the master which are not in
+the candidate are written to a file named "missing".  Any entries
+which are in the candidate and not in the master are written to a file
+named "extra".
+}
+
+MISC Diagnostics {
+<C>ibVerifyCollection.pl</C> returns non-zero if there are any
+problems with the files or any missing or extra entries in candidate.
+}
+
+ALSO {
+InstallBuilder,
+ibCollect.pl,
+ibBuild.pl,
+}

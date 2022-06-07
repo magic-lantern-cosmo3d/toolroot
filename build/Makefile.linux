@@ -1,0 +1,44 @@
+# -*- Makefile -*-
+######################################################################
+#
+# Makefile for tools/build to build RPM distribution package
+#
+# Three products are built:
+#   o wz_toolroot      - cross platform build environment tools
+#
+# $Id: Makefile.linux,v 1.1 2004/05/26 19:12:09 msm Exp $
+#
+######################################################################
+
+IBDIR = $(WORKAREA)/tools/installBuilder
+IBBASEDIR = ..
+IBVERIFYCOLLECT = perl -w $(IBDIR)/bin/ibVerifyCollection.pl
+IBBUILD = perl -w $(IBDIR)/bin/ibBuild.pl -baseDir $(IBBASEDIR)
+
+default rawidb: collect verifyCollect
+
+collect:
+	rm -f collect.raw
+	cd ..; make collect
+
+collect.raw : collect
+
+verifyCollect: collect.master collect.raw
+	rm -f extra missing
+	$(IBVERIFYCOLLECT) collect.master collect.raw
+
+build: verifyCollect
+	$(IBBUILD) -collect collect.master \
+                   -spec spec.linux \
+                   -target linux \
+                   -relocate /usr/local \
+                   -ibDir $(IBDIR)
+
+clean: _FORCE
+	rm -rf instcruft
+	rm -f collect.raw
+
+clobber: clean
+	rm -rf *.rpm
+
+_FORCE:

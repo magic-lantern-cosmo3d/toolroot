@@ -1,0 +1,1351 @@
+<!-- $Id: makefileStyleGuide.html,v 1.1 2004/05/26 19:14:40 msm Exp $ -->
+
+<html>
+
+<head>
+
+<link rel="stylesheet" type="text/css" href="../../../wz-style.css">
+
+<title>Makefile Style Guide</title>
+
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+
+</head>
+
+<body bgcolor="#FFFFFF">
+<a href="http://www.wizzer.com/projects/index.htm">Wizzer Works 
+Projects</a> : <a href="http://www.wizzer.com/projects/swengr/index.htm">Software 
+Engineering</a> : <a href="http://www.wizzer.com/projects/swengr/toolroot/index.htm">Toolroot</a> 
+: Makefile Style Guide 
+<hr>
+
+<h1 align="center">The Makefile Style Guide</h1>
+
+<p>Author: <b><i>Mark S. Millard</i></b><br>
+
+Last Modified: <b><i>April 17, 2000</i></b></p>
+
+<p>This document discusses a process which can support a cross-platform build 
+
+  environment. It was originally concieved at Silicon Graphics and applied to 
+
+  the (now defunct) Cosmo Software product line. Wizzer Works has adopted this 
+
+  process and refined the tools to work for the Linux and Windows platforms. Eventually, 
+
+  the Macintosh platform will also be supported.</p>
+
+<p>Contents:<br>
+
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#Section 1.0">1.0 
+
+  About This Document</a><br>
+
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#Section 2.0">2.0 
+
+  Dependencies</a><br>
+
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#Section 2.1">2.1 
+
+  Tool Dependencies</a><br>
+
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#Section 3.0">3.0 
+
+  The Makefile Process</a><br>
+
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#Section 4.0">4.0 
+
+  Creating a Simple Makefile</a><br>
+
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#Section 5.0">5.0 
+
+  Creating a Makefile with Multiple Configurations</a><br>
+
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#Section 5.1">5.1 
+
+  Configurations and leafdefs</a><br>
+
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href="#Section 6.0">6.0 Creating 
+
+  an ISM</a><br>
+
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#Section 6.1">6.1 
+
+  ismdefs and ismrules </a><br>
+
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#Section 6.2">6.2 
+
+  Making Installation Images</a><br>
+
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#Section 6.3">6.3 
+
+  Collecting</a><br>
+
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#Section 6.4">6.4 
+
+  Verifying</a><br>
+
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#Section 6.5">6.5 
+
+  Images</a><br>
+
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#Section 6.6">6.6 
+
+  Specifying Vesion of DSO/DLL</a><br>
+
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#Section 6.7">6.7 
+
+  Specifying DLL Base Addresses</a><br>
+
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#Section 6.8">6.8 
+
+  Generating and Including Version Resource</a> <br>
+
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#Section 7.0">7.0 
+
+  Propagating the Product Version Number</a><br>
+
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#Section 8.0">8.0 
+
+  Examples</a><br>
+
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#Section 9.0">9.0 
+
+  Glossary</a></p>
+
+<hr>
+
+<h2><a name="Section 1.0"></a>1.0 About This Document</h2>
+
+<p>This document is designed for interactive use. Throughout the document there 
+
+  are pointers to examples that can be used to create a Makefile and/or an ISM. 
+
+  A copy of one of these examples can be downloaded and used as a template for 
+
+  your project. Simply click on the link (<b>&lt;shift&gt;-&lt;left mouse button&gt;</b> 
+
+  in Netscape) and then save the file to a local directory on your workstation.</p>
+
+<p>This document should be considered a &quot;living document&quot;. That is, 
+
+  it will be updated as we develop our cross-platform build environment and employ 
+
+  new software engineering practices.</p>
+
+<hr>
+
+<h2><a name="Section 2.0"></a>2.0 Dependencies</h2>
+
+<h3><a name="Section 2.1"></a>2.1 Tool Dependencies</h3>
+
+<p>The following tools are required for using this process.</p>
+
+<blockquote> 
+
+  <p>On Linux:<br>
+
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GNU Software Development Tool 
+
+    Suite<br>
+
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Perl5 ( tested with version 
+
+    5.005_03) <br>
+
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Wizzer Works Toolroot (wz_toolroot)</p>
+
+  <p>On PC:<br>
+
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Microsoft Visual C++ 5.0 Tool 
+
+    Suite <br>
+
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Perl5 ( tested with version 
+
+    5.003_07) <br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Wizzer Works Toolroot (wz_toolroot, 
+    superset of <a href="http://sourceware.cygnus.com/cygwin" target="_top">Cygwin/Redhat 
+    tools</a>)</p>
+
+  <p>On Macintosh:<br>
+
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Not currently supported. Support 
+
+    for this platform will begin with the Mac OS X.</p>
+
+</blockquote>
+
+<hr>
+
+<h2><a name="Section 3.0"></a>3.0 The Makefile Process</h2>
+
+<p>The Makefile process is designed to be as similiar to the SGI Makefile process 
+
+  as possible. Users who are familiar with the SGI Makefile process should be 
+
+  able to understand this process without much difficulty. Originally, it was 
+
+  not designed to be a cross-platform solution. However, with some work, Wizzer 
+
+  Works has been able to leverage this process onto the Linux and Windows platforms 
+
+  supporting a cross-platformm development environment. With some additional work, 
+
+  all platforms which support the GNU development tools could be supported.</p>
+
+<p>In order for this process to work, the GNU tools must first be installed (see 
+  <a href="#Section 2.1">2.1 Tool Dependencies</a>). On Windows, the Wizzer Works 
+  Toolroot includes the necessary GNU tools from <a href="http://www.redhat.com" target="_top">Cygnus/Redhat</a>. 
+  Perl 5 is also required by this process.</p>
+
+<p>When the Wizzer Works Toolroot is installed, it places itself (by deafult) 
+
+  in a known location.</p>
+
+<ul>
+
+  <li>Linux - <i><b>/var/wizzer</b></i></li>
+
+  <li>Windows - <i><b>C:\wizzer</b></i></li>
+
+  <li>Macintosh - <b>XXX</b><b> (Macintosh not yet supported)</b></li>
+
+</ul>
+
+<p>This location can be changed during installation. For the remainder of this 
+
+  document, this location will be referred to as the <b>WzDev</b> directory.</p>
+
+<p>Under the WzDev directory there are two subdirectories of interest for the 
+
+  make system: <i><b>include/make</b></i> and <i><b>examples</b></i>. In <i>include/make</i> 
+
+  there are several files that the Makefiles will need to use. If more detailed 
+
+  information is required about what is going on in the make system, then refer 
+
+  to the files in the <i>include/make</i> directory.</p>
+
+<p>In <i>examples</i> there are four example &quot;projects&quot;:</p>
+
+<ol>
+
+  <li>a simple project, which has source code that must be compiled, under <i><b>simple</b></i>.</li>
+
+  <li>a more involved project which creates a &quot;debug&quot; and &quot;release&quot; 
+
+    version, under <i><b>multiversion</b></i>.</li>
+
+  <li>an ISM (Independent Software Module) which adds targets for managing products, 
+
+    under <i><b>ism</b></i>.<br>
+
+    <br>
+
+    The ism project provides the targets &quot;rawidb&quot; and &quot;images&quot; 
+
+    to help build simple root images.</li>
+
+  <li>a <b>fakemake</b> project which is very similar to the ism project.<br>
+
+    <br>
+
+    It also provides the target &quot;fakemake&quot; to help generate workspace 
+
+    and project files to integrate with Microsoft's Visual Studio IDE (Integrated 
+
+    Development Environment).</li>
+
+</ol>
+
+<hr>
+
+<h2><a name="Section 4.0"></a>4.0 Creating a Simple Makefile</h2>
+
+<p>This example assumes that the software project is relatively simple. For example, 
+
+  there are only three files: <font face="Courier New, Courier, mono">hello.c</font>, 
+
+  <font face="Courier New, Courier, mono">foo.h</font>, and <font face="Courier New, Courier, mono">foo.h</font>. 
+
+  The following Makefile may be used to build an executable called <font face="Courier New, Courier, mono">hello.exe</font> 
+
+  that is to be run from the command line.</p>
+
+<p><font face="Courier New, Courier, mono">#*****************************************************************<br>
+
+  #<br>
+
+  # Makefile - for building a simple application<br>
+
+  #<br>
+
+  #*****************************************************************<br>
+
+  <br>
+
+  WZDEV_DIR = C:/wizzer<br>
+
+  include $(WZDEV_DIR)/include/make/commondefs<br>
+
+  <br>
+
+  TARGETS = hello.exe<br>
+
+  <br>
+
+  CFILES = hello.c foo.c<br>
+
+  <br>
+
+  all: $(TARGETS)<br>
+
+  <br>
+
+  $(TARGETS): $(OBJECTS)<br>
+
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$(LD) $(OBJECTS) $(LDFLAGS)<br>
+
+  <br>
+
+  include $(COMMONRULES)<br>
+
+  </font> </p>
+
+<p><i>(Note that you do NOT need to define WZDEV_DIR on the Linux platform. It 
+
+  currently defaults to /var/wizzer. WZDEV_DIR is defined here for the Windows 
+
+  platform, for illustrative purposes only. You may have to change WZDEV_DIR to 
+
+  refer the location where you installed wz_toolroot.)</i></p>
+
+<p>Notice how similar the Makefile is to an SGI Makefile. If &quot;make&quot; 
+
+  is typed into a shell at the location where this Makefile resides, then the 
+
+  executable <font face="Courier New, Courier, mono">hello.exe</font> would be 
+
+  built.</p>
+
+<hr>
+
+<h2><a name="Section 5.0"></a>5.0 Creating a Makefile with Multiple Configurations</h2>
+
+<p>Eventually, multiple configurations of an executable or library will be required 
+
+  (e.g. a debug and a release version). This is slightly more complicated than 
+
+  the previous example. In order to do this, the following Makefile should be 
+
+  used:</p>
+
+<p><font face="Courier New, Courier, mono">#*****************************************************************<br>
+
+  #<br>
+
+  # Makefile - for building multiple versions of an app, library<br>
+
+  #<br>
+
+  #*****************************************************************<br>
+
+  <br>
+
+  WZDEV_DIR = C:/wizzer<br>
+
+  include $(WZDEV_DIR)/include/make/commondefs<br>
+
+  <br>
+
+  #<br>
+
+  # Set which versions are to be built. There needs to be a<br>
+
+  # subdirectory under here for each one (in order for the<br>
+
+  # VERSIONS_MAKERULE to work)<br>
+
+  #<br>
+
+  VERSIONS = debug release<br>
+
+  <br>
+
+  all $(COMMONTARGS):<br>
+
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$(VERSIONS_MAKERULE)<br>
+
+  <br>
+
+  include $(COMMONRULES)<br>
+
+  <br>
+
+  </font>In this Makefile, the <font face="Courier New, Courier, mono">VERSIONS</font> 
+
+  macro defines which versions of the product should be created. This requires 
+
+  a subdirectory for each version, each with its own Makefile. The <font face="Courier New, Courier, mono">VERSIONS_MAKERULE</font> 
+
+  takes care of invoking &quot;make&quot; in each of those directories. Although 
+
+  it isn't illustrated here, the macro <b><font face="Courier New, Courier, mono">CUR_VERSION</font></b> 
+
+  can be used to determine the name of the version being made at any level in 
+
+  the directory hierarchy.</p>
+
+<h3><i><a name="Section 5.1"></a></i>5.1 Configurations and <i>leafdefs</i></h3>
+
+<p>This section describes how to create Makefiles for each version of the target 
+
+  (in this case, debug and release). This can be done by hand, setting different 
+
+  compiler flags for each configuration, but then there would be a lot of redundant 
+
+  information in each of those Makefiles (for instance, the source files being 
+
+  compiled). To make this a bit cleaner, the notion of <b><i>leafdefs</i></b> 
+
+  must be introduced.</p>
+
+<p><i>leafdefs</i> is a file that lives in the same directory as the Makefile 
+
+  above, but is referenced by each Makefile in each version subdirectory. For 
+
+  instance, the Makefile that implements the debug version of the &quot;hello&quot; 
+
+  application is:</p>
+
+<p><font face="Courier New, Courier, mono">#*****************************************************************<br>
+
+  #<br>
+
+  # Makefile - for building multiple versions of an app, library,<br>
+
+  # etc. under that version subdirectory<br>
+
+  #<br>
+
+  #*****************************************************************<br>
+
+  <br>
+
+  #<br>
+
+  # Set which configuration this is<br>
+
+  #<br>
+
+  CONFIGURATION = ConsoleDebug<br>
+
+  <br>
+
+  LEAF_DEPTH = ..<br>
+
+  <br>
+
+  #<br>
+
+  # The actual work of building is in the directory above, in a<br>
+
+  # file called &quot;leafdefs&quot;<br>
+
+  #<br>
+
+  include $(LEAF_DEPTH)/leafdefs<br>
+
+  </font></p>
+
+<p>The release version can be viewed <a href="../examples/multiversion/release/Makefile">here</a>.</p>
+
+<p>Note that a variable called LEAF_DEPTH is set. This defines where the &quot;leaf&quot; 
+
+  of our source tree is. That is, where the source files are (99% of the time 
+
+  this will be &quot;..&quot;). The example &quot;tree&quot; doesn't really have 
+
+  any structure yet, but it will when ISMs are discussed below.</p>
+
+<p>This Makefile also introduces the concept of setting a <b>configuration</b>. 
+
+  A configuration sets up some preset values or options for the tools being used 
+
+  to compile and link. The current set of configurations supported are:</p>
+
+<ul>
+
+  <li>GenericRelease</li>
+
+  <li>GenericDebug</li>
+
+  <li>ConsoleRelease</li>
+
+  <li>ConsoleDebug</li>
+
+  <li>Win32Release</li>
+
+  <li>Win32Debug</li>
+
+  <li>LibRelease</li>
+
+  <li>LibDebug</li>
+
+  <li>DllRelease</li>
+
+  <li>DllDebug</li>
+
+  <li>MfcDllRelease</li>
+
+  <li>MfcDllDebug</li>
+
+  <li>MfcAppRelease</li>
+
+  <li>MfcAppDebug</li>
+
+</ul>
+
+<p>The <i>configurations</i> files exists in the WzDev directory under <i>include/make</i>. 
+
+  These are pulled in from <i>commondefs</i> (in the same directory), which <i>leafdefs</i> 
+
+  includes.</p>
+
+<p>Once the configuration is defined, it includes the <i>leafdefs</i> file:</p>
+
+<p><font face="Courier New, Courier, mono">#*****************************************************************<br>
+
+  #<br>
+
+  # leafdefs - application definitions and rules common to all<br>
+
+  # versions. This file is included by the Makefiles in the version<br>
+
+  # directories. Directories are referenced relative to a particular<br>
+
+  # version directory, not this one.<br>
+
+  #<br>
+
+  #*****************************************************************<br>
+
+  <br>
+
+  WZDEV_DIR = C:/wizzer<br>
+
+  include $(WZDEV_DIR)/include/make/commondefs<br>
+
+  </font></p>
+
+<p><font face="Courier New, Courier, mono">#<br>
+
+  # VPATH points to where the code actually is.<br>
+
+  #<br>
+
+  VPATH = $(LEAF_DEPTH)<br>
+
+  </font><font face="Courier New, Courier, mono"><br>
+
+  TARGETS = hello.exe<br>
+
+  <br>
+
+  CFILES = hello.c foo.c<br>
+
+  <br>
+
+  all: $(TARGETS)<br>
+
+  <br>
+
+  $(TARGETS): $(OBJECTS)<br>
+
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$(LD) $(OBJECTS) $(LDFLAGS)<br>
+
+  <br>
+
+  include $(COMMONRULES)</font></p>
+
+<p>Notice that this file looks very similar to the simple Makefile above. There 
+
+  is one important thing to keep in mind: <b>the leafdefs file must be thought 
+
+  of as residing in a particular version subdirectory as opposed to where it actually 
+
+  is located</b>. <font face="Courier New, Courier, mono">VPATH</font> is used 
+
+  to direct the make system to where the actual source files are: at the &quot;leaf&quot;. 
+
+  Using <font face="Courier New, Courier, mono">LEAF_DEPTH</font> here does just 
+
+  that.</p>
+
+<p>The following diagram attempts to show the relationship between the &quot;leaf&quot;, 
+
+  the version subdirectories and the <i>leafdefs</i> file.</p>
+
+<p>XXX - Insert Image Here</p>
+
+<p>Typing <i>make</i> in the &quot;leaf&quot; directory should now make two versions 
+
+  of the &quot;hello&quot; application <font face="Courier New, Courier, mono">hello.exe</font>; 
+
+  one debug version and one release version, in each of those directories, respectively. 
+
+  To build only one particular version, for example the debug version, then type 
+
+  <i>make debug</i> in the leaf directory. Note this only works in the leaf directory. 
+
+  An alternative way to build a particular version of the application is to use 
+
+  the environment variable <b>PREF_VERSION</b>. Setting PREF_VERSION will select 
+
+  which version will be built when make is envoked.</p>
+
+<hr>
+
+<h2><a name="Section 6.0"></a>6.0 Creating an ISM</h2>
+
+<p><i>Note: The concepts discussed above should be thoroughly understood before 
+
+  reading this section!</i></p>
+
+<p>A mature software project is usually more complicated than the type of projects 
+
+  which have been presented so far. Not only do projects need to build multiple 
+
+  versions of an executable or library, but they also have fairly complex directory 
+
+  sturctures, build multiple libararies and executables, and need to create an 
+
+  installation package which does not directly reflect the build environment. 
+
+  For the purposes of this methodology, a complex software project such as this 
+
+  will be called an <b>ISM</b> (Independent Sofware Module).</p>
+
+<p>A sample ISM directory structure may look like this:</p>
+
+<ul>
+
+  <li>hello Product 
+
+    <ul>
+
+      <li>cmd 
+
+        <ul>
+
+          <li>src 
+
+            <ul>
+
+              <li>release</li>
+
+              <li>debug</li>
+
+            </ul>
+
+          </li>
+
+        </ul>
+
+      </li>
+
+      <li>doc 
+
+        <ul>
+
+          <li>text</li>
+
+        </ul>
+
+      </li>
+
+      <li>build 
+
+        <ul>
+
+          <li>release</li>
+
+          <li>debug</li>
+
+        </ul>
+
+      </li>
+
+    </ul>
+
+  </li>
+
+</ul>
+
+<p>In order to take care of building this ISM, a few more types of Makefiles need 
+
+  to be introduced. These are in addition to the Makefiles which have already 
+
+  been discussed. The required Makefiles are:</p>
+
+<ol>
+
+  <li>A top-level Makefile.</li>
+
+  <li>A Makefile that knows how to descend into subdirectories.</li>
+
+  <li>A Makefile that knows how to build in the current directory as well as descend 
+
+    into subdirectories (called &quot;Makefile.multi&quot;).</li>
+
+  <li>A &quot;collector&quot; Makefile (one that just collects files for installation).</li>
+
+  <li>A Makefile for the &quot;build&quot; directory (where images are built).</li>
+
+  <li>A Makefile for each &quot;build&quot; version (e.g. debug and release).</li>
+
+</ol>
+
+<p>The following diagram shows where these Makefiles go in the above example.</p>
+
+<ul>
+
+  <li>hello Product <i>- top level Makefile (or Makefile.multi)</i> 
+
+    <ul>
+
+      <li>cmd - <i>descending Makefile (or Makefile.multi)</i> 
+
+        <ul>
+
+          <li>src - <i>leaf Makefile + leafdefs</i> 
+
+            <ul>
+
+              <li>release - <i>release leaf Makefile</i></li>
+
+              <li>debug - <i>debug leaf Makefile</i></li>
+
+            </ul>
+
+          </li>
+
+        </ul>
+
+      </li>
+
+      <li>doc - <i>descending Makefile </i> 
+
+        <ul>
+
+          <li>text - <i>collector Makefile</i></li>
+
+        </ul>
+
+      </li>
+
+      <li>build - <i>build Makefile </i> 
+
+        <ul>
+
+          <li>debug - <i>debug build Makefile</i></li>
+
+          <li>release - <i>release build Makefile</i></li>
+
+        </ul>
+
+      </li>
+
+    </ul>
+
+  </li>
+
+</ul>
+
+<h3><i><a name="Section 6.1"></a></i>6.1 <i>ismdefs</i> and <i>ismrules</i></h3>
+
+<p>This section takes a look at some of the supporting files which are used to 
+
+  make this system work. In <a href="#Section 5.1">Section 5.1</a>, the 
+
+  <i>leafdefs</i> file was introduced to help define macros and rules that were 
+
+  common to all versions being built. Similarly for an ISM, a pair of files are 
+
+  used to take care of the definitions, macros and rules that need to be common 
+
+  for all the Makefiles throughout the entire ISM. These files are <i><b>ismdefs</b></i> 
+
+  and <i><b>ismrules</b></i>.</p>
+
+<p>The ismdefs file lives at the &quot;top level&quot; of the ISM and is included 
+
+  by every Makefile in the system.</p>
+
+<p>This requires that each Makefile set a variable called <font face="Courier New, Courier, mono"><b>ISM_DEPTH</b></font>, 
+
+  wich points to the top level of the ISM (that is, the top of the make system). 
+
+  For instance, the top level Makefile starts like this:</p>
+
+<p><font face="Courier New, Courier, mono">ISM_DEPTH = .<br>
+
+  include $(ISM_DEPTH)/ismdefs</font></p>
+
+<p>The <i>ismdefs</i> file does the following:</p>
+
+<ol>
+
+  <li>Set <font face="Courier New, Courier, mono">PREF_VERSION</font> to the version 
+
+    of the product which is to be built (if it isn't already set in the environment). 
+
+    Note that <font face="Courier New, Courier, mono">PREF_VERSION</font> does 
+
+    NOT have to be set. If it isn't set, all versions will be built by default.</li>
+
+  <li>Set <font face="Courier New, Courier, mono">WZDEV_DIR </font>to point to 
+
+    where the wz_toolroot is installed. Note that this MUST be set; the default 
+
+    is defined in <a href="#Section 3.0">Section 3.0, The Makefile Process</a>.</li>
+
+  <li>Set some ISM-specific variables that are required:<br>
+
+    <br>
+
+    <ul>
+
+      <li><font face="Courier New, Courier, mono">ISM_NAME</font> - a name for 
+
+        the ISM (this just helps with MSDEV integration right now)</li>
+
+      <li><font face="Courier New, Courier, mono">ISM_VERSION</font> - a version 
+
+        number for the ISM. This version will not only carry into the installation 
+
+        images, but also into the source code. See <a href="#Section 7.0">Section 
+
+        7.0, Propogating the Product Version Number</a>.</li>
+
+      <li><font face="Courier New, Courier, mono">ISM_TIMEBOMB_DATE</font> - a 
+
+        date for a time bomb for the product, if any (this is optional).</li>
+
+    </ul>
+
+    <br>
+
+  </li>
+
+  <li>The above variables need to be set because they support the <i><b>ismcommondefs</b></i> 
+
+    file. <i>ismcommondefs</i> is an installed common file in the make system. 
+
+    It differs from <i>commondefs</i> because it has some ISM-specific definitions 
+
+    inside of it. It will include <i>commondefs</i>.</li>
+
+  <li>Define where the &quot;very top&quot; of the ISM is. This may simply be 
+
+    the same as the top level of the ISM, but it may not be. For instance, if 
+
+    the cross-platform development guidelines are followed (XXX), the ISM is in 
+
+    a subdirectory under the &quot;very top&quot; level directory. It would be 
+
+    a sibling to a &quot;common&quot; directory, a &quot;linux&quot; directory, 
+
+    etc. By default, it is set to <font face="Courier New, Courier, mono">ISM_DEPTH</font>.</li>
+
+  <li>Some definitions of where targets are put. This is just a convenience.</li>
+
+  <li>Define a vaiable called <b><font face="Courier New, Courier, mono">ISMRULES</font></b>, 
+
+    which points to where the ismrules file is. This is just so the Makefile can 
+
+    say &quot;<font face="Courier New, Courier, mono">include $(ISMRULES)</font>&quot;.</li>
+
+</ol>
+
+<p>The <i>ismdefs</i> file may be customized since it is specific to a given ISM. 
+
+  The <i>ismrules</i> file is the set of rules that are also common to the entire 
+
+  ISM; however, this file is not ususally modified.</p>
+
+<h3><a name="Section 6.2"></a>6.2 Making Installation Images</h3>
+
+<p>This make system also allows for creating installation images using a set of 
+
+  programs and scripts called the <b><i>InstallBuilder</i></b>. InstallBuilder 
+
+  is designed to use external installation packages such as <b>RPM</b> and <b>InstallSHIELD</b>. 
+
+  All of the necessary supporting files are in the WzDev directory. InstallBuilder 
+
+  requires a <i><b>build</b></i> directory into which the installable images are 
+
+  placed. The make system should do the rest. The <i>build</i> directory can be 
+
+  overridden by setting <font face="Courier New, Courier, mono"><b>ISM_BUILDDIR</b></font> 
+
+  in <i>ismdefs</i>.</p>
+
+<h3><a name="Section 6.3"></a>6.3 Collecting</h3>
+
+<p>Collecting is the process of gathering up the files which are to be part of 
+
+  the installation image. In order to have parts of the ISM go into the installation 
+
+  image, a &quot;collect&quot; rule must be provided. For instance, in the above 
+
+  example the <i>leafdefs</i> file in the <b>src</b> directory implements collect 
+
+  like this:</p>
+
+<p><font face="Courier New, Courier, mono">collect: all<br>
+
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$(IBCOLLECT) -log $(CUR_COLLECTLOG) 
+
+  -tags &quot;CMD&quot; \<br>
+
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-srcDir 
+
+  .\<br>
+
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-destDir 
+
+  bin \<br>
+
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$(TARGETS)</font></p>
+
+<p>During the collection phase, the various collect rules append to a file called 
+
+  <i><b>collect.raw</b></i>, also called a &quot;collectlog&quot;, which lives 
+
+  somewhere under the <b>build</b> directory. The structure under the build directory 
+
+  is simple. There is a subdirectory for each version of the installation images 
+
+  to build. If the file or files being collected have a particular version (i.e 
+
+  debug or relase), then they are collected into the <i>collect.raw</i> file in 
+
+  the respective directory. This is what <font face="Courier New, Courier, mono"><b>CUR_COLLECTLOG</b></font> 
+
+  points to, a collectlog of a particular version. If the file or files do NOT 
+
+  have a version (e.g. headers or documentation), then use <font face="Courier New, Courier, mono"><b>COMMON_COLLECTLOG</b></font>. 
+
+  Here is what the Makefile does under <b>doc/text</b> in the example ISM:</p>
+
+<p><font face="Courier New, Courier, mono">collect: all<br>
+
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$(IBCOLLECT) -log $(COMMON_COLLECTLOG) 
+
+  \<br>
+
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-srcDir 
+
+  .\<br>
+
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-destDir 
+
+  bin \<br>
+
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-tags 
+
+  &quot;DOC&quot; \<br>
+
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;./README</font></p>
+
+<p><font face="Courier New, Courier, mono"><b>IBCOLLECT</b></font> is the collection 
+  command. The &quot;-srcDir&quot; flag points to where the file being collected 
+  resides (default is the current directory). The &quot;-destDir&quot; flag tells 
+  the collector where this file goes during installation. The &quot;-tags&quot; 
+  flag indicates what subsystem this file belongs in. Tags are defined in the 
+  <i>spec.dat</i> file (more on this later). Finally, the remaining arguments 
+  are the list of files that are to be collected. For more information see the 
+  documentation on <b><a href="ibCollect.html">ibCollect</a></b>.</p>
+
+<h3><a name="Section 6.4"></a>6.4 Verifying</h3>
+
+<p>Once files have been collected, at least one <i>collect.raw</i> file is created; 
+
+  one common file plus one for each version. In the <b>build</b> directory, alongside 
+
+  the <i>collect.raw</i> file, is a checked-in file called <i><b>collect.master</b></i>. 
+
+  The <i>collect.master</i> file is used to compare <i>collect.raw</i> against 
+
+  what the installation package thinks should be in the installation image. If 
+
+  the files aren't exactly the same, a <b><i>missing</i></b> and/or <b><i>extra</i></b> 
+
+  file is created (meaning &quot;missing from collect.raw&quot; or &quot;extra 
+
+  in collect.raw&quot;), and make terminates. Here are what the &quot;common&quot; 
+
+  and debug <i>collect.raw</i> files look like, respectively, for the ISM example:</p>
+
+<p>build/collect.raw:</p>
+
+<p><font face="Courier New, Courier, mono">#InstallBuilder Collection 1.0<br>
+
+  file bin/README doc/text/README DOC</font></p>
+
+<p>build/debug/collect.raw:</p>
+
+<p><font face="Courier New, Courier, mono">#InstallBuilder Collection 1.0<br>
+
+  file bin/hello.exe cmd/src/debug/hello.exe CMD</font></p>
+
+<p>Note the similarity of the <i>collect.raw</i> file to the <b><i>IDB</i></b> 
+
+  file and <i>collect.master</i> to the <b><i>idb</i></b> file in SGI's Makefile 
+
+  system. Also, there is a <i><b>spec.dat</b></i> file, similar to the SGI <b><i>spec</i></b> 
+
+  file (but not as complete). The <i>spec</i> file simply defines the name of 
+
+  the ISM that will be presented to the user during installation, as well as the 
+
+  separate subsystem tags (e.g. DOC, CMD, etc.) Check out the example <i>spec.dat</i> 
+
+  file here.</p>
+
+<p>The above steps are actually two separate phases: the <b>collect</b> phase 
+
+  and <b>verifyCollect</b> phase. These phases are consolidated with a <b>cleanCollect</b> 
+
+  phase (which just removes the collectlogs before collecting) into a single make 
+
+  target called <b>rawidb</b>.</p>
+
+<h3><a name="Section 6.5"></a>6.5 Images</h3>
+
+<p>Once the rawidb target is built, the final phase of building the images simply 
+
+  involves typing <i>&quot;make images&quot;</i> at the top of the ISM. This will 
+
+  create an InstallSHIELD executable or RPM package for each product defined in 
+
+  the <i>spec.dat</i> file for each version (e.g debug and release). The packages 
+
+  will be placed in the version subdirectory under the <b>build</b> directory.</p>
+
+<p>For example, under Windows the result of &quot;make images&quot; for the hello 
+  world example will be an executable called <i>helloWorldInstall.exe</i> in each 
+  of the <b>debug</b> and <b>release</b> subdirectories under <b>build</b> (the 
+  name of this executable was created using the product name from the <i>spec.dat</i> 
+  file (see <b><a href="ibBuild.html">ibBuild</a></b> for more information). Running 
+  one of these executables will then install the program hello.exe and the README 
+  file into the Temp/bin directory on a PC. This package can be uninstalled by 
+  using &quot;Add/Remove Programs&quot; under the Control Panel.</p>
+
+<p>To rebuild an entire ISM from scratch (generating installation images), do 
+
+  the following:</p>
+
+<ol>
+
+  <li>make clobber</li>
+
+  <li>make all</li>
+
+  <li>make rawidb</li>
+
+  <li>make images</li>
+
+</ol>
+
+<h3><a name="Section 6.6"></a>6.6 Specifying Version of DSO/DLL</h3>
+
+<p>Note: this section needs more work in identifying a cross-platform versioning 
+
+  mechanism for both Linux and Windows. These are some recent thoughts.</p>
+
+<p>To simplify changing which version of a DLL or DSO is being used by a product, 
+
+  the following lines (or ones similar to them) could be placed into the <i>ismdefs</i> 
+
+  file.</p>
+
+<p><font face="Courier New, Courier, mono">#<br>
+
+  # DLL/DSO version. This number is appended to each DLL name imported <br>
+
+  # from the ISM identified by the first set of characters.<br>
+
+  #<br>
+
+  DLL1_VERSION_NUM = 1.0<br>
+
+  DLL2_VERSION_NUM = 2.5<br>
+
+  <br>
+
+  DLL1_VERSION = $(DLL1_VERSION_NUM)<br>
+
+  DLL2_VERSION = $(DLL2_VERSION_NUM)</font></p>
+
+<p>And then, in the <i>leafdefs</i> file, link to the libraries similar to this:</p>
+
+<p><font face="Courier New, Courier, mono">LLDLIBS = \<br>
+
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;$(DLL1_PATH)/libdso1$(DLL_VERSION_SFX).so.$(DLL1_VERSION) 
+
+  \<br>
+
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$(DLL2_PATH)/libdso2$(DLL_VERSION_SFX).so.$(DLL2_VERSION) 
+
+  \<br>
+
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$(NULL)</font></p>
+
+<p>The <i>commondefs</i> file sets <b>$(DLL_VERSION_SFX)</b> to either nothing 
+
+  (for release builds) or the character &quot;d&quot; (for debug builds).</p>
+
+<p>If a style like this is used in the <i>ismdefs</i>, <i>leafdefs</i> and <i>collect.master</i> 
+
+  files, then it will be easy to change to build against a new version of a library.</p>
+
+<h3><a name="Section 6.7"></a>6.7 Specifying DLL Base Addresses</h3>
+
+<p>This section is only relevant to the Windows platform. When a DLL can't be 
+
+  loaded to its default location, it is very expensive to remap it. Thus some 
+
+  effort must be made to coordinate the base addresses of the dlls. Future documentation 
+
+  and tools will be made available about how this can be managed.</p>
+
+<h3><a name="Section 6.8"></a>6.8 Generating and Including Version Resource</h3>
+
+<hr>
+
+<h2><a name="Section 7.0"></a>7.0 Propagating the Product Version Number</h2>
+
+<p>A common problem within an ISM is the propagation of the product version number. 
+
+  The version number is often hardcoded into many places throughout the ISM (e.g. 
+
+  the spec file, various places within the source code, ...). The problem arises 
+
+  when a product's version number changes. It is often difficult to remember or 
+
+  find all the places in which the number appears. For example, if a product has 
+
+  a weekly alpha release, the product version number may change weekly (say from 
+
+  2.0a3 to 2.0a4). This means that the spec file and a number of source code files 
+
+  will have to be manually changed each week. The problem becomes worse the more 
+
+  frequently the version number changes (e.g. daily alpha snapshots).</p>
+
+<p>To avoid the problems associated with hardcoding the product version number 
+
+  in many places, a top level Makefile definition file can be used. This file 
+
+  is included in all product Makefiles and defines a product version number string. 
+
+  This string is passed on to the compiler as a -D definition and can also be 
+
+  referred to in spec files. Therefore, changing the version number in one place 
+
+  will propagate to the remainder of the product.</p>
+
+<p>To implement the automatic propogation of the product version number, follow 
+
+  these steps:</p>
+
+<ol>
+
+  <li>Each Makefile should include <i>ismdefs</i>. Among other definitions, this 
+
+    file contains the product version number.</li>
+
+  <li>Refer to the version number in the source codes as a defined string constant. 
+
+    For example:<br>
+
+    <br>
+
+    <font face="Courier New, Courier, mono">printf(&quot;%s\n&quot;, ISM_VERSION);<br>
+
+    len = strlen(ISM_VERSION);</font></li>
+
+  <li>Refer to the product version number in spec files as an environment variable:<br>
+
+    <br>
+
+    <font face="Courier New, Courier, mono">id &quot;Wizzer Works Toolroot, ${ISM_VERSION}&quot;</font></li>
+
+</ol>
+
+<hr>
+
+<h2><a name="Section 8.0"></a>8.0 Pointers to Examples</h2>
+
+<p>These examples may be used as templates for projects configured against the 
+
+  style guidelines presented in this document:</p>
+
+<ul>
+
+  <li> A simple <a href="../examples/simple/Makefile">Makefile</a></li>
+
+  <li>A multiple-version <a href="../examples/multiversion/Makefile">Makefile</a> 
+    <ul>
+
+      <li> A debug version <a href="../examples/multiversion/debug/Makefile">Makefile</a></li>
+
+      <li>A release version <a href="../examples/multiversion/release/Makefile">Makefile</a></li>
+
+      <li>The <i><a href="../examples/multiversion/leafdefs">leafdefs</a></i> 
+        file for each version</li>
+
+    </ul>
+
+  </li>
+
+  <li>A top level <a href="../examples/ism/Makefile">Makefile</a> for an ISM 
+    <ul>
+
+      <li>A <a href="../examples/ism/cmd/Makefile">Makefile</a> that knows how 
+        to descend into subdirectories</li>
+
+      <li>A Makefile that knows how to build in the current directory as well 
+
+        as descend into subdirectories</li>
+
+      <li>A &quot;collector&quot; <a href="../examples/ism/cmd/src/debug/Makefile">Makefile</a> 
+        (one that collects files for installation)</li>
+
+      <li>A <a href="../examples/ism/build/Makefile">Makefile</a> for the &quot;build&quot; 
+        directory (where images are built)</li>
+
+      <li>A Makefile for each &quot;build&quot; version (e.g. <a href="../examples/ism/build/debug/Makefile">debug</a> 
+        &amp; <a href="../examples/ism/build/release/Makefile">release</a>)</li>
+
+      <li><i><a href="../examples/ism/ismdefs">ismdefs</a></i> &amp; <i><a href="../examples/ism/ismrules">ismrules</a></i></li>
+
+      <li>Example <i><a href="../examples/ism/cmd/src/leafdefs">leafdefs</a></i> 
+        file for inside an ISM</li>
+
+    </ul>
+
+  </li>
+
+</ul>
+
+<hr>
+
+<h2><a name="Section 9.0"></a>9.0 Glossary</h2>
+
+<ul>
+
+  <li><b>cleanCollect</b> - phase in build process which removes the <i>collect.raw</i> 
+
+    file before building new collection. This phase then calls both the collect 
+
+    and verifyCollect phases, respectively.</li>
+
+  <li><b>collect</b> - phase in build process which gathers up the files to be 
+
+    installed by the distribution package. This phase generates the <i>collect.raw</i> 
+
+    file. </li>
+
+  <li><b>collect.master</b> - master list of files to be installed by the distribution 
+
+    package.</li>
+
+  <li><b>collect.raw</b> - &quot;current snapshot&quot; collection of files to 
+
+    be installed by the distribution package. This file is generated by the <i>ibCollect.pl</i> 
+
+    InstallBuilder tool.</li>
+
+  <li><b>commondefs</b> - file containing common Makefile definitions.</li>
+
+  <li><b>commonrules</b> - file containing common Makefile rules.</li>
+
+  <li><b>configuration</b> - file containing predefined build environment configurations.</li>
+
+  <li><b>DLL</b> - dynamic link library, .dll suffix.</li>
+
+  <li><b>DSO</b> - dynamic shared object, .so suffix.</li>
+
+  <li><b>extras</b> - file containing list of installation files in collect.raw, 
+
+    but not in the master collection, collect.master. This file is generated by 
+
+    the <i>ibVerifyCollection.pl</i> InstallBuilder tool.</li>
+
+  <li><b>idb</b> - Silicon Graphics' master collection of files to be installed 
+
+    in an inst package.</li>
+
+  <li><b>IDB</b> - Silicon Graphics' &quot;current snapshot&quot; collection of 
+
+    files to be installed in an inst package.</li>
+
+  <li><b>IDE</b> - Integrated Development Environment.</li>
+
+  <li><b>ISM</b> - Independent Software Module.</li>
+
+  <li><b>ismdefs</b> - file containing project specific Makefile definitions for 
+
+    an ISM.</li>
+
+  <li><b>ismrules</b> - file containing project specific Makefile rules for an 
+
+    ISM.</li>
+
+  <li><b>leafdefs</b> - file containing common definitions for leaf nodes in make 
+
+    directory hierarchy.</li>
+
+  <li><b>missing</b> - file containing list of installation files in collect.master, 
+
+    but not in the current snapshot for the project, collect.raw. This file is 
+
+    generated by the <i>ibVerifyCollection.pl</i> InstallBuilder tool.</li>
+
+  <li><b>rawidb</b> - Makefile target for executing the cleanCollect phase.</li>
+
+  <li><b>spec</b> - Silicon Graphics' product specification file.</li>
+
+  <li><b>spec.dat</b> - product specification file.</li>
+
+  <li><b>verifyCollect</b> - phase in build process which compares the <i>collect.raw</i> 
+
+    file against the <i>collect.master</i> file. This file generates the <i>extras</i> 
+
+    and <i>missing</i> files if necessary.</li>
+
+  <li><b>wz_toolroot</b> - the Wizzer Works Toolroot distribution package containing 
+
+    the cross-platform Makefile definitions and rules.</li>
+
+  <li><b>WzDev</b> - directory location for Wizzer Works Toolroot.</li>
+
+</ul>
+
+
+
+<hr>
+
+<p><font size="-2">Last Published: May 18, 2000<br>
+
+Contact: <a href="mailto:webmaster@wizzer.com">webmaster@wizzer.com</a></font></p> 
+
+</body>
+
+</html>
+

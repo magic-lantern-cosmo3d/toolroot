@@ -1,0 +1,95 @@
+<!DOCTYPE html PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<html version="3.0">
+<head>
+<link rel="stylesheet" type="text/css" href="../../../wz-style.css">
+<meta name="generator" content="HTML Tidy, see www.w3.org">
+<!-- Automatically generated HTML from man page source -->
+<title>ibVerifyCollection.pl Document</title>
+</head>
+<body bgcolor="#FFFFFF">
+<a href="http://www.wizzer.com/projects/index.htm">Wizzer Works Home Page</a> 
+: <a href="http://www.wizzer.com/projects/swengr/index.htm">Software Engineering</a> 
+: <a href="http://www.wizzer.com/projects/swengr/toolroot/index.htm">Toolroot</a> 
+: rpmDiff 
+<hr>
+
+<h3>rpmDiff.pl -- Perl Script for Comparing RPM Distribution Packages</h3>
+
+<small>
+<p>
+Author: <b><i>Mark S. Millard</i></b><br>
+  Last Modified: <b><i>May 31, 2000</i></b> </p>
+</small>
+
+<hr>
+<dl> 
+  <dt><b>NAME</b></dt>
+  <p></p>
+  <dd><b>rpmDiff.pl</b> -- compare a candidate BOM against a master BOM</dd>
+  <p></p>
+  <dt><b>SYNOPSIS</b></dt>
+  <p></p>
+  <dd><b>perl</b> rpmDiff.pl [--verbose] [--mpackage= | --mlist=]<i>master </i>[--cpackage= 
+    | --clist=]<i>candidate</i></dd>
+  <p></p>
+  <dt><b>DESCRIPTION</b></dt>
+  <p></p>
+  <dd>rpmDiff.pl compares a candidate bill-of-materials (BOM) against a master 
+    bill-of-materials (BOM), reporting what entries are missing from the candidate 
+    or are extra in the candidate. Any entries in the master which are not in 
+    the candidate are written to a file named "missing". Any entries which are 
+    in the candidate and not in the master are written to a file named "extra". 
+    <p><b>Options</b></p>
+    <dl> 
+      <dt><b>--mpackage=</b><i>master</i> - <i>master</i> is an uninstalled RPM 
+        package with a .rpm extension<br>
+        <b>--mlist=</b><i>master</i> - <i>master</i> is a file containing a list 
+        of files to compare the candidate against<br>
+        <b>--cpackage=</b><i>candidate</i> - <i>candidate</i> is an uninstalled 
+        RPM package with a .rpm extension<br>
+        <b>--clist=</b><i>candidate</i> - <i>candidate</i> is a list of files 
+        to be compared against the master<br>
+        <b>--verbose</b> - be verbose about the comparison process</dt>
+    </dl>
+    <p><b>--mpackage=</b> and <b>--mlist=</b> are mutually exclusive. Likewise, 
+      so are <b>--cpackage=</b> and <b>--clist=</b>. When these options are not 
+      applied, the default behavior is to assume that the BOM is an installed 
+      RPM package.</p>
+  </dd>
+  <p></p>
+  <dt><b>DIAGNOSTICS</b> 
+    <blockquote> 
+      <p>rpmDiff.pl returns non-zero if there are any problems with the files 
+        or any missing or extra entries in candidate.</p>
+    </blockquote>
+    <p><b>EXAMPLES</b></p>
+  </dt>
+  <dd><b>perl rpmDiff.pl <i>wz_toolroot-base-0.5-1</i> --cpackage=<i>wz_toolroot-base-0.5-1.i386.rpm</i></b> 
+    <p>This example will compare the installed RPM package <i>wz_toolroot-base-0.5-1</i> 
+      with the uninstalled RPM package file <i>wz_toolroot-0.5-1.i386.rpm</i>. 
+      If files exist in the candidate, wz-toolroot-0.5-1.i386.rpm, which are not 
+      in the master, wz_toolroot-0.5-1, then a file named <i>extra</i> will be 
+      created with the list of the extra files.</p>
+  </dd>
+  <dd> <b>perl rpmDiff.pl --mpackage=<i>wz_toolroot-base-0.5-1.i386.rpm</i> --clist=<i>wz_toolroot.BOM</i></b></dd>
+  <dt>&nbsp;</dt>
+  <dd>This example will compare the uninstalled package file <i>wz_toolroot-0.5-1.i386.rpm</i> 
+    with the ASCII file <i>wz_toolroot.BOM</i>. If files existing in the candidate, 
+    wz_toolroot.BOM, are missing from the master, wz_toolroot-base-0.5-1.i386.rpm, 
+    then a file named <i>missing</i> will be created with the list of missing 
+    files.</dd>
+  <dd> 
+    <p>&nbsp;</p>
+  </dd>
+  <p></p>
+  <dt><b>SEE ALSO</b></dt>
+  <p></p>
+  <dd><a href="installBuilder.html">InstallBuilder</a>, <a href="rpmList.html">rpmList</a></dd>
+</dl>
+<hr>
+<small> Last Published: <i>May 31, 2000</i><br>
+Contact: <a href="mailto:webmaster@wizzer.com">webmaster@wizzer.com</a>
+</small>
+
+</body>
+</html>

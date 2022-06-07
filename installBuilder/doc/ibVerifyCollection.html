@@ -1,0 +1,78 @@
+<!DOCTYPE html PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<html version="3.0">
+<head>
+<link rel="stylesheet" type="text/css" href="../../../wz-style.css">
+<meta name="generator" content="HTML Tidy, see www.w3.org">
+<!-- Automatically generated HTML from man page source -->
+<title>ibVerifyCollection.pl Document</title>
+</head>
+<body bgcolor="#FFFFFF">
+<a href="http://www.wizzer.com/projects/index.htm">Wizzer Works 
+Home Page</a> : <a href="http://www.wizzer.com/projects/swengr/index.htm">Software 
+Engineering</a> : <a href="http://www.wizzer.com/projects/swengr/toolroot/index.htm">Toolroot</a> 
+: ibVerifyCollection 
+<hr>
+
+<h3>ibVerifyCollection.pl -- Perl Script for Verifying Distribution Package Collection</h3>
+
+<small>
+<p>
+Author: <b><i>Mark S. Millard</i></b><br>
+Last Modified: <b><i>April 17, 2000</i></b>
+</p>
+</small>
+
+<hr>
+<dl>
+<dt><b>NAME</b></dt>
+
+<p></p>
+
+<dd><b>ibVerifyCollection.pl</b> -- compare a candidate collection
+file against a master</dd>
+
+<p></p>
+
+<dt><b>SYNOPSIS</b></dt>
+
+<p></p>
+
+<dd><b>perl</b> ibVerifyCollection.pl <i>master candidate</i></dd>
+
+<p></p>
+
+<dt><b>DESCRIPTION</b></dt>
+
+<p></p>
+
+  <dd>ibVerifyCollection.pl compares a candidate collection file against a master, 
+    reporting what entries missing from the candidate or extra in the candidate. 
+    Any entries in the master which are not in the candidate are written to a 
+    file named "missing". Any entries which are in the candidate and not in the 
+    master are written to a file named "extra".</dd>
+
+<p></p>
+
+<dt><b>DIAGNOSTICS</b></dt>
+
+  <dd>ibVerifyCollection.pl returns non-zero if there are any problems with the 
+    files or any missing or extra entries in candidate.</dd>
+
+<p></p>
+
+<dt><b>SEE ALSO</b></dt>
+
+<p></p>
+
+  <dd><a href="installBuilder.html">InstallBuilder</a>, <a href= 
+"ibBuild.html">ibBuild.pl</a>, <a href="ibCollect.html"> ibCollect.pl</a></dd>
+</dl>
+
+<hr>
+<small>
+Last Published: <i>May 18, 2000</i><br>
+Contact: <a href="mailto:webmaster@wizzer.com">webmaster@wizzer.com</a>
+</small>
+
+</body>
+</html>

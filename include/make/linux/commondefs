@@ -1,0 +1,547 @@
+# -*- Makefile -*-
+#
+#  Copyright (C) 2000  Wizzer Works Inc.
+#
+#  This Makefile is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation; either version 2 of the License, or
+#  any later version.
+#
+#  This Makefile is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this Makefile; if not, write to the Free Software
+#  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+#  For information concerning this Makefile, contact Mark S. Millard,
+#  of Wizzer Works Inc. at msm@wizzer.com.
+#
+#*************************************************************************
+#
+# commondefs - Common build definitions and macros
+#
+# This file is modeled after the commondefs file used for SGI IRIX builds.
+# Include commondefs individually in each Makefile (or, if not using
+# ismcommondefs, in your top level ismdefs file.)
+#
+# The build uses GNU make and a Bourne-compatible shell. All pathnames and
+# directories should be specified in UNIX style using the '/' separator
+# (drive letters can also be used).
+#
+# To build software on Linux you must install the Wizzer Works Toolroot.
+# Assuming the toolroot is installed in the default location /usr/local/wizzer,
+# you must put /usr/local/wizzer/InstallBuilder/bin in your PATH.
+#
+# The standard pathname for this file is:
+#
+#		/usr/local/wizzer/include/make/linux/commondefs
+#
+# If the Wizzer Works Toolroot has been installed in a location other than
+# /usr/local/wizzer, define the environment variable WZDEV_DIR with the new
+# location.
+#
+# $Id: commondefs,v 1.1 2004/05/26 19:17:30 msm Exp $
+#
+#*************************************************************************
+
+#
+# Define where to look for these files.
+#
+ifndef WZDEV_DIR
+WZDEV_DIR = /usr/local/wizzer
+endif
+
+#
+# Use bash (Bourne Again SHell) as the Makefile environment
+#
+SHELL = $(TOOLROOT)/bin/bash
+
+#
+# Command definitions.
+#
+AR		= $(TOOLROOT)/usr/bin/ar
+AWK		= $(TOOLROOT)/bin/gawk
+CC		= $(TOOLROOT)/usr/bin/gcc
+CP		= $(TOOLROOT)/bin/cp
+CXX		= $(TOOLROOT)/usr/bin/g++
+C++		= $(TOOLROOT)/usr/bin/g++
+FIND		= $(TOOLROOT)/usr/bin/find
+LD		= $(TOOLROOT)/usr/bin/ld
+LEX		= $(TOOLROOT)/usr/bin/flex
+MKDIR		= $(TOOLROOT)/bin/mkdir -p
+MV		= $(TOOLROOT)/bin/mv
+PERL		= $(TOOLROOT)/usr/bin/perl
+RM		= $(TOOLROOT)/bin/rm -f	
+SED		= $(TOOLROOT)/bin/sed
+SORT		= $(TOOLROOT)/bin/sort
+TOUCH		= $(TOOLROOT)/bin/touch
+TR		= $(TOOLROOT)/usr/bin/tr
+YACC		= $(TOOLROOT)/usr/bin/yacc
+INSTALL		= $(TOOLROOT)/usr/bin/install
+JAVA		= $(TOOLROOT)/usr/bin/java
+JAVAC		= $(TOOLROOT)/usr/bin/javac
+JAR		= $(TOOLROOT)/usr/bin/jar
+
+#
+# Command definitions with flags
+#
+ARF		= $(AR) $(ARFLAGS)
+CCF		= $(CC) $(CFLAGS)
+CXXF		= $(CXX) $(CXXFLAGS)
+C++F		= $(C++) $(C++FLAGS)
+LDF		= $(LD) $(LDFLAGS)
+LEXF		= $(LEX) $(LEXFLAGS)
+YACCF		= $(YACC) $(YACCFLAGS)
+
+#
+# Setup the makedoc command (invokes cocoon)
+#
+MAKEDOCS	= $(PERL) $(WZDEV_DIR)/bin/makedocs.pl
+
+#
+# Makedepend
+#
+# We use gcc -M since it is more efficient than mkdepend from X11.
+# The perl script is to rearrange the output of gcc so that
+# it conforms to the bash //c/ syntax instead of C:/, and so that 
+# we can handle spaces in filenames via the FILENAME_EXCEPTIONS
+# variable (which defaults to simply "Program Files").
+#
+#MAKEDEPEND	= perl $(WZDEV_DIR)/bin/makedepend.pl -D_M_IX86 -D_MSC_VER
+MAKEDEPEND	= gcc -M
+
+# This is a comma-separated list of names that should have their spaces
+# escaped in the depends file.  Be sure to: enclose the names in double
+# quotes, and place a comma at the end of your addition.
+#
+# i.e. to add the directory names "Common Includes" and "My Files" 
+# to the list, add a line like the following:
+# FILENAME_EXCEPTIONS += "Common Includes", "My Files",
+# The match will be case-insensitive.
+#FILENAME_EXCEPTIONS = "Program Files",
+
+#
+# Do nothing command that can be used with a target that should not
+# do anything. This prevents make from complaining that nothing is to
+# be done for the target.
+#
+NOOP = @echo -n
+
+#
+# Flags
+#
+# Flags to the compiler and linker consist of three major parts:
+#	Variable (V*)	- flags set on the command line (e.g. VCXXDEFS=-DJUNK)
+#	Local (L*)	- flags defined in the Makefile
+#	ISM (I*)	- flags defined in the ismdefs
+#	Global (G*)	- flags defined in commondefs
+#
+
+#
+# Compiler Flags
+#
+# Compiler flags consist of three parts
+#	Definitions (*DEFS)	- flags for setting defines (e.g. -DJUNK)
+#	Options (*OPTS)		- flags for setting options (e.g. -nologo)
+#	Includes (*INCS)	- flags for include directory searches
+
+#
+# Common C and C++ flags
+#
+# -nologo	Suppress copyright notice output
+# -GX		Do the right thing for exception handling
+# WARN_LEVEL	Default is strictest (W4). Override WARN_LEVEL to change
+#
+WARN_LEVEL	=
+OPTIMIZER	= -O
+GCCOMOPTS	= $(OPTIMIZER) $(WARN_LEVEL)
+GCCOMDEFS	= -D"LINUX"
+#STD_INCLUDE	= $(shell splitpath -q -p '-I' '$(INCLUDE)')
+STD_INCLUDE	= -I$(INCLUDE)
+
+#
+# OpenGL header files and libraries
+#
+ifndef SGI_OPENGL
+OPENGLINCS = 
+OPENGLLIBS =				\
+	libGLU.so.3			\
+	libGL.so.3			\
+	$(NULL)
+else
+
+OGL_VERSION_NUM	= 11
+OGL_VERSION	= $(OGL_VERSION_NUM)$(DLL_VERSION_SFX)
+
+ifndef OPENGLDEV_DIR
+OPENGLDEV_DIR = $(WZDEV_DIR)
+endif
+OPENGLINCS = -I$(OPENGLDEV_DIR)/include
+OPENGLLIBS =				\
+	$(OPENGLDEV_DIR)/lib/openglrdu$(OGL_VERSION).lib	\
+	$(OPENGLDEV_DIR)/lib/openglrd$(OGL_VERSION).lib	\
+	$(NULL)
+endif
+
+
+#
+# C
+#
+CFLAGS	= $(COPTS) $(CDEFS) $(CINCS) $(LCFLAGS)
+CDEFS	= $(GCDEFS) $(ICDEFS) $(LCDEFS) $(VCDEFS)
+COPTS	= $(GCOPTS) $(ICOPTS) $(LCOPTS) $(VCOPTS)
+CINCS	= $(VCINCS) $(LCINCS) $(ICINCS) $(GCINCS) 
+
+GCDEFS	= $(GCCOMDEFS)
+GCOPTS	= $(GCCOMOPTS)
+
+#
+# C++
+#
+CXXFLAGS	= $(CXXOPTS) $(CXXDEFS) $(CXXINCS) $(LCXXFLAGS)
+CXXDEFS		= $(GCXXDEFS) $(ICXXDEFS) $(LCXXDEFS) $(VCXXDEFS)
+CXXOPTS		= $(GCXXOPTS) $(ICXXOPTS) $(LCXXOPTS) $(VCXXOPTS)
+CXXINCS		= $(VCXXINCS) $(LCXXINCS) $(ICXXINCS) $(GCXXINCS)
+
+GCXXDEFS	= $(GCCOMDEFS)
+# Only use precompiled headers with CPP programs at this time
+GCXXOPTS	= $(GCCOMOPTS) $(PCH_OPTS)
+
+C++FLAGS	= $(C++OPTS) $(C++DEFS) $(C++INCS) $(LC++FLAGS)
+C++DEFS		= $(GC++DEFS) $(IC++DEFS) $(LC++DEFS) $(VC++DEFS)
+C++OPTS		= $(GC++OPTS) $(IC++OPTS) $(LC++OPTS) $(VC++OPTS)
+C++INCS		= $(VC++INCS) $(LC++INCS) $(IC++INCS) $(GC++INCS)
+
+GC++DEFS	= $(GCCOMDEFS)
+# Only use precompiled headers with CPP programs at this time
+GC++OPTS	= $(GCCOMOPTS) $(PCH_OPTS)
+
+#
+# Java
+#
+JCFLAGS		= $(JCOPTS) $(JCDEFS) $(JCINCS) $(LJCFLAGS)
+JCDEFS		= $(GJCDEFS) $(IJCDEFS) $(LJCDEFS) $(VJCDEFS)
+JCOPTS		= $(GJCOPTS) $(IJCOPTS) $(LJCOPTS) $(VJCOPTS)
+JCINCS		= $(VJCINCS) $(LJCINCS) $(IJCINCS) $(GJCINCS)
+
+GJCDEFS	= $(GJCCOMDEFS)
+GJCOPTS	= $(GJCCOMOPTS)
+
+#
+# Linker flags
+#
+LDFLAGS		= $(LDOPTS) $(LDLIBS)
+LDOPTS		= $(GLDOPTS) $(ILDOPTS) $(LLDOPTS) $(VLDOPTS)
+LDLIBS		= $(VLDLIBS) $(LLDLIBS) $(ILDLIBS) $(GLDLIBS)
+
+#GLDOPTS	= -m elf_i386 -dynamic-linker /lib/ld-linux.so.2 -o $@
+GLDOPTS		=
+#GLDLIBS		= /usr/lib/crt1.o /usr/lib/crti.o /usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/crtbegin.o -L/usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66 -L/usr/i386-redhat-linux/lib -lc -lgcc -lc -lgcc /usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66/crtend.o /usr/lib/crtn.o
+GLDLIBS		=
+
+DSOMAJOR	= 1
+DSOMINOR	= 0
+DSOVERSION	= 1
+LDDSOOPTS	= -shared $(DSONAMEOPT)
+
+#
+# DLL suffix. The letter "d" is appended to the debug version of each DLL name
+# exported by this ISM.
+#
+ifeq ($(CUR_VERSION),debug)
+DLL_VERSION_SFX	= d
+else
+DLL_VERSION_SFX	=
+endif    
+         
+#
+# Archiver flags
+#
+ARFLAGS		= $(GAROPTS) $(IAROPTS) $(LAROPTS) $(VAROPTS)
+
+GAROPTS		= rv
+
+#
+# Include the configurations file. A Makefile can define
+# CONFIGURATION to be one of the standard configurations
+# found in the configuration file. This will set various
+# compiler switches and link libraries
+#
+ifdef CONFIGURATION
+include $(WZDEV_DIR)/include/make/configurations
+endif
+
+#
+# Clear all suffixes except for a limited set. Even though
+# this is a "rule" we put it here so that Makefiles can
+# augment the suffix list immediately after including
+# commondefs.
+#
+# Avoid using the .cpp suffix since it is not supported
+# across platforms (e.g. on IRIX). Use .cxx instead.
+#
+.SUFFIXES:
+.SUFFIXES: .c .cxx .c++ .l .y .o .a .java .class
+
+#
+# Implicit rules
+#
+ifdef NODEPENDS
+ifeq ($(NODEPENDS),VERBOSE)
+CXXDEPENDRULE = @echo "Skipping dependency building for $<"
+C++DEPENDRULE = @echo "Skipping dependency building for $<"
+CDEPENDRULE = @echo "Skipping dependency building for $<"
+else
+CXXDEPENDRULE = 
+C++DEPENDRULE = 
+CDEPENDRULE = 
+endif
+else
+GCCOMOPTS +=
+CXXDEPENDRULE =
+C++DEPENDRULE =
+CDEPENDRULE =
+endif
+
+#
+# Note that pwd is used to create an absolute pathname so that
+# the IDE can find the file if there is an error in the file.
+#
+ifeq ($(CDEPENDRULE),)
+%.o: %.c
+	$(CC) -c $(CFLAGS) `pwd`/$<
+else
+%.o: %.c
+	$(CC) -c $(CFLAGS) `pwd`/$<
+	$(CDEPENDRULE)
+endif
+
+ifeq ($(CXXDEPENDRULE),)
+define obj-cxx
+$(CXX) -c $(CXXFLAGS) `pwd`/$<
+endef
+else
+define obj-cxx
+$(CXX) -c $(CXXFLAGS) `pwd`/$<
+$(CXXDEPENDRULE)
+endef
+endif
+
+%.o: %.cxx
+	$(obj-cxx)
+
+ifeq ($(C++DEPENDRULE),)
+define obj-c++
+$(C++) -c $(C++FLAGS) `pwd`/$<
+endef
+else
+define obj-c++
+$(C++) -c $(C++FLAGS) `pwd`/$<
+$(C++DEPENDRULE)
+endef
+endif
+
+%.o: %.c++
+	$(obj-c++)
+
+.java.class:
+	$(JAVAC) $(JCFLAGS) `pwd`/$<
+
+#
+# The first target in all Makefiles must be 'all'. The
+# following are targets common to all Makefiles and are defined in
+# commonrules:
+#
+# clean:	Remove all intermediate files (e.g. .o) but leave end
+#		products (e.g. app, dll).
+#
+# clobber:	'clean' plus removal of end products.
+#
+# rmtargets:	Removes end products but leaves intermediate files.
+#
+# rebuild:	Performs a 'clobber' followed by a 'all'
+#
+# ideclobber:	Removes all IDE generated workspace and project support
+#		files (e.g. .dsw, .dsp).
+#
+# For Makefiles that both descend into subdirectories and need to
+# process the common targets in the current directory, the common
+# targets that need to be defined in the Makefile (e.g. all) should
+# be defined with $(THISPREF) as the prefix (e.g. $(THISPREF)all).
+# $(THISPREF) is automatically defined when SUBDIRS is defined.
+#
+COMMONTARGS	= \
+		clean \
+		clobber \
+		collect \
+		depends \
+		prebuild \
+		rmtargets \
+		rebuild \
+		ideclobber \
+		$(NULL)
+
+PREFTARGS	= \
+		$(THISPREF)clean \
+		$(THISPREF)clobber \
+		$(THISPREF)collect \
+		$(THISPREF)depends \
+		$(THISPREF)prebuild \
+		$(THISPREF)rmtargets \
+		$(THISPREF)rebuild \
+		$(THISPREF)ideclobber \
+		$(NULL)
+
+#
+# All Makefiles (or ismrules) should have
+#
+#	include $(COMMONRULES)
+#
+# AFTER the first target is defined.
+#
+COMMONRULES = $(WZDEV_DIR)/include/make/commonrules
+
+#
+# This is where defs & rules for making installations are:
+#
+INSTALLDEFS = $(WZDEV_DIR)/include/make/installdefs
+INSTALLRULES = $(WZDEV_DIR)/include/make/installrules
+
+#
+# This is where defs & rules for making a particular 
+# installation version are
+#
+INSTALLVERSIONDEFS = $(WZDEV_DIR)/include/make/installversiondefs
+INSTALLVERSIONRULES = $(WZDEV_DIR)/include/make/installversionrules
+
+#
+# This is where defs & rules for the top level Makefile:
+#
+TOPLEVELDEFS = $(WZDEV_DIR)/include/make/topleveldefs
+TOPLEVELRULES = $(WZDEV_DIR)/include/make/toplevelrules
+
+#
+# File lists
+#
+# The file lists below are combined to form the SOURCES macro
+# which lists all source files and the OBJECTS macro which
+# lists all object files built from the sources with the
+# exception of resource files which are listed in RCOBJECTS.
+#
+# Makefiles should define the following as needed:
+#
+# TARGETS	- end product of the build
+# CFILES	- C source files
+# CXXFILES	- C++ source files
+# RCFILES	- Resource files
+# LFILES	- Lex source files
+# YFILES	- Yacc source files
+#
+SOURCES = $(CFILES) $(CXXFILES) $(C++FILES) $(RCFILES) $(LFILES) $(YFILES)
+CXXOBJ1 = $(CXXFILES:.cxx=.o)
+CXXOBJ2 = $(C++FILES:.c++=.o)
+CXXOBJALL = $(CXXOBJ1) $(CXXOBJ2)
+OBJECTS = $(CFILES:.c=.o) $(CXXOBJALL) \
+	$(LFILES:.l=.o) $(YFILES:.y=.o)
+
+#
+# Makedepend will create a dependency file (.dep) per
+# source file. These will be automatically included into
+# the Makefile by commonrules
+#
+DEPENDS = $(OBJECTS:.o=.dep)
+
+#
+# Build cruft
+#
+# DIRT defines those files that should be removed as part of
+# a clean or clobber. Makefiles should define LDIRT with those
+# "non-standard" files that need to be removed.
+#
+# TDIRT iare files that should be removed when the target itself
+# is removed.
+#
+DIRT = $(GDIRT) $(IDIRT) $(LDIRT) $(VDIRT)
+GDIRT += *.o *.pch
+
+TDIRT = $(GTDIRT) $(ITDIRT) $(LTDIRT) $(VTDIRT)
+
+#
+# Macros for doing cascading builds. Makefiles define SUBDIRS
+# with a list of subdirectories to descend into. Define
+# NOSUBMSG to any value to supress the warning message for
+# subdirectories that do not exist.
+#
+_SUBDIR_MAKERULE = \
+	errstat=0; \
+	if test ! -d $$d; then \
+		if test "$(NOSUBMSG)" = "" ; then \
+			echo "SKIPPING $$d: No such directory"; \
+		fi \
+	else \
+		echo "---- cd $$d; $(MAKE) -$(MAKEFLAGS) $$targ"; \
+		cd $$d; $(MAKE) -$(MAKEFLAGS) $$targ || errstat=$$?; \
+		cd -; \
+	fi; \
+	test $$errstat -eq 0
+
+SUBDIRS_MAKERULE = \
+	@errstat=0; \
+	targ=$@; for d in $(SUBDIRS); do $(_SUBDIR_MAKERULE) || break; done; \
+	test $$errstat -eq 0
+
+SUBDIR_MAKERULE = \
+	@targ="all"; d=$@; $(_SUBDIR_MAKERULE) || exit $$errstat
+
+#
+# Macros for doing version builds. Makefiles define VERSIONS
+# with a list of subdirectories to descend into. Each subdirectory
+# represents a different version of the program to build. Typically
+# these subdirectories should be called 'debug' and 'release'. Define
+# NOSUBMSG to any value to supress the warning message for
+# subdirectories that do not exist. Normally all versions are built
+# but if PREF_VERSION is defined, only that version is built.
+#
+# Each version will be built with CUR_VERSION automatically set to the
+# currently building version. This allows the Makefile for each version
+# to use CUR_VERSION for version-specific processing (e.g. copying
+# executables in a version-specific top level directory).
+#
+_VERSION_MAKERULE = \
+	verrstat=0; \
+	if test ! -d $$d; then \
+		if test "$(NOSUBMSG)" = "" ; then \
+			echo "SKIPPING $$d: No such version directory"; \
+		fi \
+	else \
+		echo "=== version $$d; $(MAKE) $(MYMAKEFLAGS) $$targ"; \
+		cd $$d; $(MAKE) $(MYMAKEFLAGS) CUR_VERSION=$$d $$targ || verrstat=$$?; cd -; \
+	fi; \
+	test $$verrstat -eq 0
+
+ifdef PREF_VERSION
+VERSIONS_MAKERULE = \
+	@targ=$@; d=$(PREF_VERSION); $(_VERSION_MAKERULE)
+else
+VERSIONS_MAKERULE = \
+	@verrstat=0; \
+	targ=$@; for d in $(VERSIONS); do $(_VERSION_MAKERULE) || break; done; \
+	test $$verrstat -eq 0
+endif
+
+VERSION_MAKERULE = \
+	@targ="all"; d=$@; $(_VERSION_MAKERULE)
+
+#
+# When we are in the version directory (*below* the leaf), make sure
+# that CUR_VERSION is set.  We take a reasonable guess here -- it's
+# the basename of the current directory.
+#
+ifdef CONFIGURATION
+ifndef CUR_VERSION
+CUR_VERSION = $(shell basename `pwd`)
+endif
+endif

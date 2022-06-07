@@ -1,0 +1,641 @@
+#!/usr/bin/perl
+############################################################################
+#									   #
+# Copyright 1996 Silicon Graphics, Inc.  ALL RIGHTS RESERVED		   #
+# 									   #
+# UNPUBLISHED -- Rights reserved under the copyright laws of the United	   #
+# States.   Use of a copyright notice is precautionary only and does not   #
+# imply publication or disclosure.					   #
+# 									   #
+# U.S. GOVERNMENT RESTRICTED RIGHTS LEGEND:  Use, duplication or	   #
+# disclosure by the Government is subject to restrictions as set forth in  #
+# FAR 52.227.19(c)(2) or subparagraph (c)(1)(ii) of the Rights in	   #
+# Technical Data and Computer Software clause at DFARS 252.227-7013        #
+# and/or in similar or successor clauses in the FAR, or the DOD or NASA	   #
+# FAR Supplement.  Contractor/manufacturer is Silicon Graphics, Inc.,	   #
+# 2011 N. Shoreline Blvd. Mountain View, CA 94039-7311.  THE CONTENT OF    #
+# THIS WORK CONTAINS CONFIDENTIAL AND PROPRIETARY INFORMATION OF SILICON   #
+# GRAPHICS, INC. ANY DUPLICATION, MODIFICATION, DISTRIBUTION, OR           #
+# DISCLOSURE IN ANY FORM, IN WHOLE, OR IN PART, IS STRICTLY PROHIBITED     #
+#									   #
+############################################################################
+#
+#ident "$Revision: 1.1 $"
+#
+# man2html
+#
+# filter SGI man pages into HTML
+#
+# Usage:
+#       man2html /<standard_path>/<file>
+#            Standard path is the standard installation
+#            location.  Do not prepend man_root to this path.
+#            Used when launching a search result or browse item
+#            (when man pages indices are installed).
+#
+#	man2html <section> <manpage>
+#            Used when man pages are called from links inside
+#            other man pages or relnotes.  Also used for browse
+#            pages when no indices are installed. Multiple man pages
+#            may have the same name and section number.
+#
+#       man2html [-stylesheet] <relative_path>/<file>
+#            Used in the man rules to convert packed nroff pages 
+#            to html and in the man regression tests. 
+#            If the manroot (infosrch.cfg) is non-null, it is 
+#            prepended to the relative_path. 
+# 
+#       -stylesheet
+#            This option is used to build simplified html with 
+#            minimal formatting information in the page.
+#            This makes the pages easier to edit and allows formatting
+#            changes to be applied to a single cascading stylesheet.
+#            For non-stylesheet compliant browsers, we all formatting
+#            to the page by passing it thru the ss2noss filter.
+# 
+# Dependencies:
+#       This is not a standalone filter.  It currently requires:
+#            -perl5
+#            -/usr/lib/infosearch/bin/nroff2html-lib.pl
+#            -/usr/lib/infosearch/bin/pgbrkcfmt
+#            -/usr/lib/infosearch/C/infosrch.cfg
+#            -Several other eoe cmds, like man, pcat, col, awf (see below)
+#
+############################################################################
+
+############################################################################
+#
+# Global Variables
+#
+############################################################################
+
+$MAN_DEBUG=0;  # Add comments to the code to clarify section indentification
+	       # Actually, you really need to set DEBUG in nroff2html-lib.pl
+$STYLESHEET=0;
+$tab=5;
+$domain="man"; # Used in nroff2html-lib to man specific code
+$TOOLROOT = $ENV{'TOOLROOT'};
+
+#######################################################################
+#
+# Main Loop
+#
+#######################################################################
+
+&main(@ARGV);
+
+#######################################################################
+#
+# void main(@args)
+#
+# usage: see above
+#
+#######################################################################
+
+sub main{
+
+    my(@argv) = @_;
+    my($svrConfigFile) = "/usr/lib/infosearch/C/infosrch.cfg";
+    my($mancmd,$command,$section) = "";
+
+    unless ($argv[0]){
+	die "man2html: no arguements\n";
+    }
+
+    if ($argv[0] eq "-stylesheet"){
+	$STYLESHEET=1;
+	shift(@argv);
+    }else{
+	# -stylesheet should only be used in the buildtree.
+	# Don't reference the TOOLROOT outside of the build tree.
+	$TOOLROOT="";
+    }
+
+    push(@INC,"./");
+    push(@INC,"$TOOLROOT/usr/lib/infosearch/bin/");
+    require 'nroff2html-lib.pl';
+
+    my($manroot) = &setDomainRoot("$svrConfigFile",$domain);
+
+    if($manroot){
+	my($redirectpath)="$manroot/usr/share/catman:" .
+	    "$manroot/usr/share/man:$manroot/usr/catman:" . 
+		"$manroot/usr/man";
+	
+	$ENV{'MANPATH'}=$redirectpath; 
+    }
+
+    if ($#argv == 0){
+	if ($argv[0] =~/\.gz$/){
+	    &outputHTMLPage($argv[0]);
+	    exit; 
+	}elsif($argv[0] =~/\.(z|[1-9][a-zA-Z]*|Z)$/){
+	    # This is a bit tricky.  There are 3 cases.
+	    # 1) file is absolute /usr/share/catman/man1/test.z
+	    # 2) file is relative usr/share/catman/man1/test.z
+	    # & we depend on a non-null $manroot to resolve the path
+	    # 3) file is relative to the current location:
+	    #    man2html fx.z  & $manroot should be ignored.
+	    #
+	    # We may want to add a -build flag to make this more 
+	    # clear.  Currently, if $STYLESHEET is set, I assume
+	    # we are in the build env.  This will not always be
+	    # the case.
+	    if($manroot){
+		$mancmd = "/usr/bin/man -d $manroot/$argv[0] |";
+	    }else{
+		$mancmd = "/usr/bin/man -d $argv[0] |";
+	    }
+	    &formatManPage($mancmd);
+	    exit; 	
+	}else{  # Need to find out how many man pages match
+	    $command = $argv[0];
+	    $mancmd="/usr/bin/man -p $command |";	
+	}
+    }elsif($#argv == 1 && $argv[0]=~/[0-8]/){
+	$section = $argv[0];
+	$command = $argv[1];
+	$mancmd="/usr/bin/man -p $section $command |";
+    }else{   
+	die "man2html: incorrect arguments, see man2html(1)\n";
+    }
+
+    my(@manpagefiles) = &findMatches($mancmd);
+    
+    if ($#manpagefiles == 0){      # One man page 
+	if ($manpagefiles[0] =~/\.gz$/){
+	    &outputHTMLPage($manpagefiles[0]);
+	    exit;
+	}else{
+	    $mancmd = "/usr/bin/man -d $manpagefiles[0] |";	    	    
+	    &formatManPage($mancmd);
+	}
+    }elsif ($#manpagefiles == -1){ # No man pages
+
+        # attempt fallback, use just cmd, not section identifier, if specified
+        if ($section ne "" ){
+	    $mancmd="/usr/bin/man -p $command |";
+            my(@manpagefiles) = &findMatches($mancmd);
+
+            if ($#manpagefiles > -1) {
+
+                  &HTMLHeaderFormat("Alternate Matching Man Pages");
+                  &header1Format("Alternate Matching Man Pages");
+	          print "<p>Unable to find specific manual page for: <b>$command($section)</b>; found these as possible alternates:</p>\n";
+	          &multiPageIndex($manroot,@manpagefiles);
+	          exit;
+            }
+        }
+
+        &HTMLHeaderFormat("InfoSearch");
+	print "<H4>Unable to find a manual page for: $command</H4>\n";
+	&HTMLTrailerFormat();
+
+    }elsif ($#manpagefiles > 0){   # Multiple man pages (unlink)
+
+        &HTMLHeaderFormat("Matching Man Pages");
+        &header1Format("Matching Man Pages");
+	&multiPageIndex($manroot,@manpagefiles);
+	exit;
+    }
+}
+
+#######################################################################
+#
+# void formatManPage(String $mancmd)
+#
+# Uncompress the page and read it in one paragraph at a time.
+#
+# Pass in the man cmd, as opposed to just the file, because we can 
+# tell if nroff exists on the system or not.
+#
+#######################################################################
+
+sub formatManPage{
+
+    my($mancmd) = @_;
+
+    my($infobin)   = "$TOOLROOT/usr/lib/infosearch/bin";
+    my($pgbrkcfmt) = "$infobin/pgbrkcfmt";
+    my($manfilter) = "col -x | $pgbrkcfmt";
+    my($manfile)   = $mancmd;
+    my($ss2nonss) = "/usr/lib/infosearch/bin/ss2nonss";
+
+    if($manfile =~ /\ ([^\ ]+\.[^\ ]+)\ /){
+	$manfile = $1;
+	unless(-e $manfile){
+	    die "$manfile: $!\n";
+	}
+    }else{
+	die "Can't get filename: $mancmd\n";
+    }
+    
+    if( $manfile =~ /\.z$/ ){	    # Packed
+	$mancmd = "/usr/bin/pcat $manfile |";
+    }elsif($manfile =~ /\.gz$/){    # Gzipped 
+	$mancmd = "/usr/sbin/gzip -dc $manfile | $ss2nonss |";
+    }elsif($manfile =~ /\.Z$/){	    # Compressed
+	$mancmd = "/usr/bsd/zcat $manfile |";
+    }elsif($manfile =~ /(\.[1-8].*)$/){ # Unformatted troff
+	if(-e "/usr/bin/nroff"){      # nroff exists on this machine
+	    $mancmd = "/usr/bin/tbl -TX $manfile | nroff -i /usr/lib/tmac/tmac.an |";
+	}else{
+	    $mancmd = "/usr/bin/awf -man $manfile |col -b |";
+	}
+	# Pages formatted with the default man macros (as opposed
+	# to the sgiman macros) as indented 5 extra spaces
+	# Unindent the entire page by 5 spaces
+	$manfilter = $manfilter . "| sed -e \"s/^\ \ \ \ \ //g\"";
+    }else{
+	print STDERR "Unknown man page format: $mancmd"
+	    unless($MAN_DEBUG == 0);
+	return;
+    }
+        
+    open(MANINPUT, "$mancmd  $manfilter |") || die "$mancmd $manfilter: $!";
+
+    $/ = "\n\n+"; # Ideally, this should be \n\n+
+
+    my @paraArray = ();
+
+    # required to be "static" for indentManParagraph
+
+    local($refName) = "";
+    local($refSection) = "";
+    local($refTitle) = "";
+    local($currentSectionName) = "";
+    local($indentedPage) = 0;
+    local($foundTitle)   = 0;
+    local($foundHeader)  = 0;
+
+    while(<MANINPUT>){
+
+	s/^\n+//;
+	s/\n+$//;
+	
+	if($_ eq ""){
+	    next;
+	}	
+
+	&pageBreakRemoval(\$_);
+
+	if(/\n\n/){
+	    @paraArray = split(/\n\n+/, $_);
+	    foreach $para (@paraArray){
+		&identManParagraph(\$para,0);
+	    }
+	}else{
+	    &identManParagraph(\$_,0);
+        }
+
+    }
+
+    &HTMLTrailerFormat();
+    exit;
+}
+
+#######################################################################
+#
+# void identManParagraph(String_ref \$buf, int $recursive)
+#
+# Identify a paragraph
+#
+#######################################################################
+
+sub identManParagraph{
+
+    my($buf_ref,$recursive) = @_;
+   
+    # Remove trailing page numbers
+    if($$buf_ref =~ /(<B>)?Page(<\/B>)?\ (<B>)?\d\d?(<\/B>)?/){ 
+	return;
+    }
+
+    $$buf_ref =~ s/^\n+//;
+    $$buf_ref =~ s/\n+$//;
+     
+    if($$buf_ref eq ""){
+	return;
+    }
+
+    if($foundHeader==0){	
+	if ($$buf_ref=~/^(\ *)(\S+)/){  # Get the name from the header
+            # Missing a header - 1st para is NAME section
+	    if($$buf_ref=~/<B>NAME<\/B>\n\ +([^\ \,]+)/i){
+		$refName = $1;
+              	&removeHTMLTags(\$refName);
+		# We could try to look at the full filename of the file
+		# and get the section number from cat[1-8].  But, for now
+		# we'll leave it empty.
+		$refSection="";
+	    }else{
+		($refName,$refSection) = &getHeaderInfo($2);
+		$foundHeader=1;
+		return;	# Don't ouput header 
+	    }
+	}else{
+	    $foundHeader=0; 
+	}
+
+    }    
+    if($foundTitle==0){		# Glean out the man page's title
+	if($$buf_ref=~/<B>NAME<\/B>\n\ +(.+)/i){ # Match Name or Name
+	    
+	    if($$buf_ref=~/\ {5}<B>NAME<\/B>/i){  
+		$indentedPage=1;
+		&fixIndentedSectionHeaders($buf_ref);
+	    }
+
+	    $refTitle = &getTitle($$buf_ref,$refSection);
+	    &HTMLHeaderFormat($refTitle);
+	    &header1Format($refName);
+	    $foundTitle=1;
+	}else{
+	    $refTitle=$refName;
+	    &HTMLHeaderFormat($refTitle);
+	    &header1Format($refName);
+	    $foundTitle=1;
+	}
+    }elsif($indentedPage==1 && $recursive==0){
+	# Need to check recursive, so we don't over-exdent idented pages
+	# see 4Dwm(1X).
+	&fixIndentedSectionHeaders($buf_ref);
+    }
+    
+    if ($$buf_ref=~/^\S/){   # Section Headers are parsed as 1 paragraph,
+	# so we split it into a header and boady
+	
+	my($header, $para) = split(/\n/,$$buf_ref,  2);
+	
+	&endIndentedSection();  # End previous section (close list)
+	&removeHTMLTags(\$header);
+	$currentSectionName = $header;	
+	&sectionHeaderFormat($header);
+	
+	&identManParagraph(\$para,1);
+	return;
+	
+    }elsif($$buf_ref=~/^\ {3}\S/){  # Sub-Header
+	
+	my($header, $para) = split(/\n/,$$buf_ref,  2);
+	my($bSubSection) = "\n<H5>";
+	my($eSubSection) = "</H5>\n";
+
+	# End previous section (close list)
+	&endIndentedSection();  
+
+	if($MAN_DEBUG){
+	    print "\n<!-- Sub Section Headings -->";
+	}
+
+	&removeHTMLTags(\$header);
+	$header =~ s/^\ +//;  # Remove any leading spaces
+
+	print "$bSubSection$header$eSubSection";
+	
+	&identManParagraph(\$para,1);
+        return;
+    }
+
+    # At this point we have some sort of body paragraph
+
+    &addLinks($buf_ref);
+    &formatParagraph($buf_ref,$currentSectionName);
+    
+}
+
+#######################################################################
+#
+# void formatParagraph(String_ref \$buf, section)
+#
+# Identify & format the paragraph
+#
+#######################################################################
+
+sub formatParagraph{
+
+    my($buf_ref, $sectionName) = @_;
+
+    # Section Name will help us select the correct formatting
+
+    if ($sectionName eq "NAME"){
+	my(@format) = &getIndentData($buf_ref, $tab);
+	&indentedSectionFormat($buf_ref, @format);
+    }elsif (index($sectionName, "SYNOPSIS", 0) >= 0) {
+	my(@format) = &getIndentData($buf_ref, $tab);
+	if(&isStraightLeftMargin($buf_ref,@format)){
+	    &sectionListFormat($buf_ref,@format);
+	}else{
+	    &unknownFormat($buf_ref, $format[0]);
+	}
+    }elsif ($sectionName eq "SEE ALSO") {
+	# More aggressive links for "SEE ALSO" ?
+	my(@format) = &getIndentData($buf_ref, $tab);
+	&indentedSectionFormat($buf_ref, @format);   	    
+    }else{ # Default format
+	my(@format) = &getIndentData($buf_ref, $tab);
+	&determineFormat($buf_ref, @format);
+    }
+    
+}
+
+#######################################################################
+#
+# @manpagefiles findMatches(String $mancmd)
+#
+# Build a list of man pages which match the command.
+# For example, there my be multiple man pages named "test"
+#
+#######################################################################
+
+sub findMatches{
+
+    my($mancmd) = @_;
+    my(@manpagefiles) = ();
+
+    open(MANPIPE, $mancmd) || die "$mancmd: !$\n";
+
+    while(<MANPIPE>){
+	# Get the filename from the man -p output
+	if(/^([^\/]+)(\/[\S]+)(\ *\|)(.+)/){
+	    push(@manpagefiles, $2);
+	}else{
+	    print STDERR "Couldn't get filename from: $_\n"
+		unless($MAN_DEBUG==0);
+	}
+    }
+    
+    return(@manpagefiles);
+
+}
+
+#######################################################################
+#
+# ($refName,$refSection) = getHeaderInfo(String $buf);
+#
+#######################################################################
+
+sub getHeaderInfo{
+
+    my($refName) = @_;
+    my($refSection) = "";
+
+    &removeHTMLTags(\$refName);
+
+    if($refName =~ /\((.+)\)/){
+	$refSection = $1;
+    }else{ # This could be a weird page like 2a_ctrl, which 
+	   # has a header with a " " section: 2A_CTRL( )
+	$refName =~ s/\(//;
+    }
+
+    return($refName,$refSection);
+}
+
+#######################################################################
+#
+# $refTitle = getTitle(String $buf,String $refSection);
+#
+#######################################################################
+
+sub getTitle{
+
+    my($refTitle,$refSection) = @_;
+
+    &removeHTMLTags(\$refTitle);
+    $refTitle =~ s/NAME\n\ *//i;
+    $refTitle =~ s/\n\ +/\ /g;
+    $refTitle =~ s/\n//g;
+    
+    # Format the title in makewhatis format (add section number)
+    if($refSection ne ""){
+	$refTitle=~s/(\ +\-)/\ \($refSection\)$1/;
+    }
+
+    return($refTitle);
+
+}
+
+#######################################################################
+#
+# void fileNameFormat(String_ref \$buf);
+#
+# Make sure filenames are in fixed font 
+#
+#######################################################################
+
+sub fileNameFormat{
+    
+    my($buf_ref) = @_;
+
+    $buf_ref =~ s/([\s\>])(\/[^\s]+)+/$1<TT>$2<\/TT>/go;
+
+}
+
+#######################################################################
+#
+# void fixIndentedSectionHeaders(String_ref \$buf)
+#
+#######################################################################
+
+sub fixIndentedSectionHeaders{
+
+    my($buf_ref) = @_;
+
+    # If the section headers are indented (like Motif Pages), remove
+    # the first 5 spaces on every line.  The page was formatted with
+    # the default man macros, not the sgiman macros. Troff source 
+    # pages are not automatically filtered by man2html to remove 
+    # the first 5 spaces, but some packed man pages were also built
+    # with the default macros (like setxkeymap & other 3rd party 
+    # man pages), so we need to still keep this function around.
+    # We may want to get a list of all these pages, and file bugs
+    # against the ones that are owned by SGI.
+
+    $$buf_ref =~ s/^\ {5}//;
+    $$buf_ref =~ s/\n\ {5}/\n/g;
+
+}
+
+#######################################################################
+#
+# void multiPageIndex($manroot, Array @manpagefiles)
+#
+# When we have multiple man pages, create an index to a 
+# list of pages. Print index to stdout.
+#
+#######################################################################
+
+sub multiPageIndex{
+
+    my($manroot) = shift @_;
+    $manroot = quotemeta($manroot);
+
+    my($cgi) = "$ENV{SCRIPT_NAME}\?cmd=getdoc&db=man&fname=";
+    my($progType,$manPageName,$manPagePath)  = "";
+    my($eRow)   ="\n\t</TR>\n";
+
+    my($bTable,$eTable) = "";
+
+    if($STYLESHEET==1){
+	$bTable="<TABLE>\n";
+	$eTable="</TABLE>\n";
+    }else{
+	$bTable="\n<TABLE CELLPADDING=0>\n";
+	$eTable="</TABLE>\n";
+    }
+
+    print $bTable;
+
+    foreach $manPageFile (@_){
+
+        $useFileName = $manPageFile;
+
+        if ($manroot ne "" ){
+            $manPageFile =~ s/$manroot//;
+            $useFileName = $manPageFile;
+        }
+
+        if($manPageFile =~ /(.+)\/(.+)\.z/o){
+
+	    $manPagePath = $1;
+	    $manPageName = $2; 
+
+   	    print "<TR>\n";
+
+	    $refType = "Manual Reference Page";
+	    $progType = "";
+		
+	    if ($manPagePath =~ /a_man/){
+	        $refType = "Administrative Reference Page";
+	    }elsif ($manPagePath =~ /g_man/){
+	        $refType = "Graphics Reference Page";
+	    }elsif ($manPagePath =~ /u_man/){
+	        $refType = "Users' Reference Page";
+	    }elsif ($manPagePath =~ /p_man/){
+	    
+	        if($manPagePath =~ /ftn/){
+		   $progType="Fortran ";
+	        }elsif($manPagePath =~ /cat3c/ || $manPagePath =~ /standard/){
+		   $progType="C ";
+	        }elsif($manPagePath =~ /cat3b/){
+		   $progType="BSD ";
+	        }elsif($manPagePath =~ /cat3n/){
+		   $progType="Networking ";
+	        }elsif($manPagePath =~ /cat3n/){
+		   $progType="Device Driver ";
+	        }
+	    
+	        $refType = "Programmers' Reference Page";
+	    }
+	
+	    print "$bCol<A HREF=\"$cgi$useFileName\">",
+	          "$manPageName<\/A>$eCol$bCol",
+	          "$space$space$space$space",
+	          "$progType$refType$eCol$eRow";
+        }
+    }
+    print "$eTable";
+    &HTMLTrailerFormat();
+}
+

@@ -1,0 +1,10 @@
+%package base
+Summary: Cross Platform Build Environment
+Group: Development/Wizzer
+Provides: wz_base
+
+%description base
+This software is a collection of Makefile rules and definitions as well
+as some simple tools for implementing a cross platform build environment.
+
+It is currently configured for the Linux and Windows platforms.

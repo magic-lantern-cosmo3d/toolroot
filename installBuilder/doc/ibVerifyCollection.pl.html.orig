@@ -1,0 +1,33 @@
+<HTML VERSION="3.0">
+<HEAD>
+<!-- Automatically generated HTML from man page source -->
+<TITLE>ibVerifyCollection.pl</TITLE>
+</HEAD>
+<BODY>
+<H3>ibVerifyCollection.pl -- </H3>
+<HR>
+<DL>
+<DT><B>NAME</B>
+<DD><B>ibVerifyCollection.pl</B> -- compare a candidate collection file
+against a master <P>
+<DT><B>SYNOPSIS</B>
+<DD>	perl ibVerifyCollection.pl master candidate
+<P>
+<DT><B>DESCRIPTION</B>
+<DD><A HREF="ibVerifyCollection.pl.html">ibVerifyCollection.pl</A> compares a candidate collection file
+against a master, reporting what entries missing from the candidate or
+extra in the candidate.  Any entries in the master which are not in
+the candidate are written to a file named "missing".  Any entries
+which are in the candidate and not in the master are written to a file
+named "extra".
+<P>
+<DT><B>DIAGNOSTICS</B>
+<DD><A HREF="ibVerifyCollection.pl.html">ibVerifyCollection.pl</A> returns non-zero if there are any
+problems with the files or any missing or extra entries in candidate.
+<P>
+<DT><B>SEE ALSO</B>
+<DD>
+<A HREF="InstallBuilder.html">InstallBuilder</A>, <A HREF="ibBuild.pl.html">ibBuild.pl</A>, <A HREF="ibCollect.pl.html">ibCollect.pl</A><P>
+</DL>
+</BODY>
+</HTML>

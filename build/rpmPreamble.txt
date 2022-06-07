@@ -1,0 +1,20 @@
+#
+# "Preamble" section of RPM spec files.
+#
+Summary: Cross Platform Build Environment
+Name: wz
+Version: 1.0
+Release: 1
+Copyright:  Copyright 2000 Wizzer Works, Inc. All rights reserved.
+Group: Development
+Source: ftp://ftp.wizzer.com
+URL: http://www.wizzer.com
+Distribution: Linux
+Vendor: Wizzer Works Inc.
+Packager: Mark S. Millard <msm@wizzer.com>
+
+%description
+This software is a collection of Makefile rules and definitions as well
+as some simple tools for implementing a cross platform build environment.
+
+It is currently configured for the Linux and Windows platforms.

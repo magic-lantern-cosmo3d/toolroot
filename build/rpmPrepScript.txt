@@ -1,0 +1,7 @@
+#
+# %prep section of RPM spec file.
+#
+%prep
+
+chown -R root.root .
+chmod -R a+rX,g-w,o-w .

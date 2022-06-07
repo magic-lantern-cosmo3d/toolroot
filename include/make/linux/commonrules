@@ -1,0 +1,181 @@
+# -*- Makefile -*-
+#
+#  Copyright (C) 2000  Wizzer Works Inc.
+#
+#  This Makefile is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation; either version 2 of the License, or
+#  any later version.
+#
+#  This Makefile is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this Makefile; if not, write to the Free Software
+#  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+#  For information concerning this Makefile, contact Mark S. Millard,
+#  of Wizzer Works Inc. at msm@wizzer.com.
+#
+#*************************************************************************
+#
+# commonrules - Common build rules.
+#
+# Makefiles must include commondefs and include $(COMMONRULES) AFTER the
+# first target is defined. See the commondefs file for detailed information.
+#
+# $Id: commonrules,v 1.1 2004/05/26 19:17:30 msm Exp $
+#
+#*************************************************************************
+
+ifdef SUBDIRS
+THISPREF = this_
+endif
+ifdef VERSIONS
+THISPREF = this_
+endif
+ifdef NEED_THISPREF
+THISPREF = this_
+endif
+
+#
+# Define the common targets as never resolved
+#
+ifdef THISPREF
+.PHONY: $(COMMONTARGS) $(PREFTARGS) $(SUBDIRS) $(VERSIONS) all
+else
+.PHONY: $(COMMONTARGS) $(SUBDIRS) $(VERSIONS) all
+endif
+
+#
+# If a Makefile that cascades down to subdirectories or versions
+# also needs to build in the current directory, it must define
+# NEED_THISPREF and create the standard targets of the form
+# $(THISPREF)<target>.
+#
+ifdef NEED_THISPREF
+all: $(THISPREF)all
+clobber: $(THISPREF)clobber
+depends: $(THISPREF)depends
+clean: $(THISPREF)clean
+rmtargets: $(THISPREF)rmtargets
+ideclobber: $(THISPREF)ideclobber
+endif
+
+#
+# Never blow away subdirs if stop make
+#
+ifdef SUBDIRS
+.PRECIOUS: $(SUBDIRS)
+endif
+
+ifdef VERSIONS
+.PRECIOUS: $(VERSIONS)
+endif
+
+#
+# If SUBDIRS or VERSIONS is defined, each subdirectory should be a pseudotarget
+#
+ifdef SUBDIRS
+$(SUBDIRS):
+	$(SUBDIR_MAKERULE)
+endif
+
+ifdef VERSIONS
+$(VERSIONS):
+	$(VERSION_MAKERULE)
+endif
+
+#
+# Common build targets
+#
+$(THISPREF)clobber: $(THISPREF)clean $(THISPREF)rmtargets
+
+$(THISPREF)clean:
+ifneq ($(strip $(DIRT)),)
+	$(RM) -r $(DIRT)
+endif
+
+$(THISPREF)rmtargets:
+ifneq ($(strip $(TDIRT)),)
+	$(RM) -r $(TDIRT)
+endif
+ifneq ($(strip $(TARGETS)),)
+	$(RM) -r $(TARGETS)
+endif
+
+$(THISPREF)rebuild: $(THISPREF)clobber $(THISPREF)all
+
+#don't build anything here by default.
+$(THISPREF)prebuild:
+
+#
+# IDE clobber target
+#
+$(THISPREF)ideclobber:
+ifneq ($(strip $(IDEDIRT)),)
+ifdef LEAF_DEPTH
+	$(RM) $(foreach idef,$(IDEDIRT),$(LEAF_DEPTH)/$(idef))
+else
+	$(RM) $(IDEDIRT)
+endif
+endif
+
+# dependency rebuilding targets...
+
+$(THISPREF)cdepends : $(CFILES)
+ifneq ($(strip $(CFILES)),)
+	@echo "Rebuilding C file dependencies..."
+	@FILENAME_EXCEPTIONS='($(FILENAME_EXCEPTIONS))' \
+	$(SHELL) -ec 'for file in $?; do \
+		export nametmp=$${file%.[Cc]}.dep; \
+		$(MAKEDEPEND) $(CINCS) $(CDEFS) $$file > $${nametmp##*[/\]}; \
+		done'
+endif
+
+$(THISPREF)cxxdepends: $(CXXFILES)
+ifneq ($(strip $(CXXFILES)),)
+	@echo "Rebuilding CXX file dependencies..."
+	@FILENAME_EXCEPTIONS='($(FILENAME_EXCEPTIONS))' \
+	$(SHELL) -ec 'for file in $?; do \
+		export nametmp=$${file%.[Cc][PXpx][PXpx]}.dep; \
+		$(MAKEDEPEND) $(CXXINCS) $(CXXDEFS) $$file > $${nametmp##*[/\]}; \
+		done'
+endif
+
+# for convenience
+$(THISPREF)depend: $(THISPREF)depends
+
+$(THISPREF)depends: $(THISPREF)cdepends $(THISPREF)cxxdepends
+
+#
+# Manual precompiled header targets. If manual precompilation is
+# desired, these targets take care of the dirty work.
+#
+# PCH_MANUAL_TARGET specifies the name for the precompiled header
+# file. PCH_MANUAL_BASENAME is the basename of the header and cxx
+# file that indicate where the precompilation is to take place.
+# If the pch object file does not end in cxx, override the value
+# of PCH_MANUAL_SUFFIX.
+#
+ifdef PCH_MANUAL_TARGET
+PCH_OPTS = -Fp"$(PCH_MANUAL_TARGET)" -Yu"$(PCH_MANUAL_BASENAME).h"
+ifndef PCH_MANUAL_SUFFIX
+PCH_MANUAL_SUFFIX = cxx
+endif
+
+$(filter-out $(PCH_MANUAL_BASENAME).o,$(OBJECTS)): $(PCH_MANUAL_TARGET)
+
+$(PCH_MANUAL_TARGET): $(PCH_MANUAL_BASENAME).o
+
+$(PCH_MANUAL_BASENAME).o: $(PCH_MANUAL_BASENAME).$(PCH_MANUAL_SUFFIX)
+	@$(SHELL) -ec '$(MAKEDEPEND) $(CXXINCS) $(CXXDEFS) $< > $(PCH_MANUAL_BASENAME).dep'
+	$(CXX) -Yc"$(PCH_MANUAL_BASENAME).h" -c $(CXXFLAGS) `pwd`/$<
+endif
+
+#
+# Include the generated dependencies file
+#
+-include $(DEPENDS)

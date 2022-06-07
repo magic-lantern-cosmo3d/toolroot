@@ -1,0 +1,208 @@
+<!DOCTYPE html PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<html version="3.0">
+<head>
+<link rel="stylesheet" type="text/css" href="../../../wz-style.css">
+
+<meta name="generator" content="HTML Tidy, see www.w3.org">
+<!-- Automatically generated HTML from man page source -->
+<title>InstallBuilder Document</title>
+</head>
+<body bgcolor="#FFFFFF">
+<a href="http://www.wizzer.com/projects/index.htm">Wizzer Works 
+Projects</a> : <a href="http://www.wizzer.com/projects/swengr/index.htm">Software 
+Engineering</a> : <a href="http://www.wizzer.com/projects/swengr/toolroot/index.htm">Toolroot</a> 
+: InstallBuilder 
+<hr>
+
+<h3>InstallBuilder -- System for Building Distribution Packages</h3>
+
+<small>
+<p>
+Author: <b><i>Mark S. Millard</i></b><br>
+Last Modified: <b><i>April 17, 2000</i></b>
+</p>
+</small>
+
+<hr>
+<dl>
+<dt><b>NAME</b></dt>
+
+<p></p>
+
+<dd><b>InstallBuilder</b> -- system for building installable images
+on the PC and/or Linux</dd>
+
+<p></p>
+
+<dt><b>DESCRIPTION</b></dt>
+
+<p></p>
+
+<dd>InstallBuilder is a system for automatically creating
+self-extracting installers for the Windows and Linux platforms. It consists of
+several executables and a process for using them. It is a very
+simplified version of SGI's system for making "inst" images. In
+this document, we will point out the rough correspondances between
+parts of InstallBuilder and parts of SGI's "inst"-making process.
+
+<p>The system consists of the following parts:</p>
+
+<ul>
+      <li><a href="ibCollect.html">ibCollect.pl</a> records which files should be installed 
+        and where. It corresponds to install's use during "make rawidb" on the 
+        SGI.</li>
+
+      <li><a href="ibVerifyCollection.html">ibVerifyCollection.pl</a> compares a collection 
+        of files to be installed against a master list. It generates "missing" 
+        and "extra" files to record any differences. This corresponds to "idbjoin" 
+        on the SGI.</li>
+
+      <li><a href="ibBuild.html">ibBuild.pl</a> generates an distribution package for 
+        each product listed in the product specification ("spec") file.<br>
+<br>
+On the PC this distribution package is an executable.
+When run, this executable will extract from itself
+and run an InstallShield installer for that product.<br>
+<br>
+On a Linux platform this distribution package is an RPM file.</li>
+</ul>
+</dd>
+
+<p></p>
+
+<dt><b>USUAL PROCESS</b></dt>
+
+<p></p>
+
+<dd>Following the
+<a href="makefileStyleGuide.html">Makefile Style Guidelines</a>
+for the cross-platform development environment, InstallBuilder is
+usually part of your build environment ISM's make structure.<br>
+
+<br>
+The following steps would be used to build a complete product
+from scratch. The final deliverable from this process will be
+an InstallShield self-extracting package, on Windows, or a
+relocatable package, RPM, on Linux.<br>
+
+<br>
+
+<ol>
+<li>"make all" from the top of your project ISM. This ensures that all
+of your targets are up-to-date.</li>
+
+<li>"make rawidb" from the top of your project ISM. This does three
+things: 
+
+<ol>
+<li>First, it empties out "collect.raw" in your <i>build</i>
+directory.</li>
+
+          <li>Second, it invokes "make collect" recursively. In each of your leaf directories, 
+            the collect rule should invoke <a href= 
+"ibCollect.html">ibCollect.pl</a>, causing it to add an entry to a "collect.raw" 
+            file in your <i>build</i> directory.</li>
+
+          <li>Third, it runs the verifyCollection target in your <i>build</i> directory. 
+            This uses <a href="ibVerifyCollection.html"> ibVerifyCollection.pl</a> 
+            to compare "collect.raw" file to "collect.master" file. (NOTE: "collect.raw" 
+            corresponds to SGI's "IDB", "collect.master" to "idb", and "ibVerifyCollection.pl" 
+            to "gendist". Also note that when you are using "versions", you will 
+            probably have several "collect.raw" and "collect.master" pairs -- 
+            one pair for files common to all versions and a pair for each version.)</li>
+</ol>
+</li>
+
+      <li>"make images" from the top of your project ISM. This runs "make images" 
+        in your <i>build</i> directory. This rule invokes <a href= 
+"ibBuild.html">ibBuild.pl</a>, which uses your product specification ("spec") 
+        and "collect.master" files to build a self extracting installer. See the 
+        man page for <a href=
+"ibBuild.html">ibBuild.pl</a> for more information.</li>
+</ol>
+</dd>
+
+<p></p>
+
+<dt><b>KNOWN LIMITATIONS</b></dt>
+
+<p></p>
+
+<dd>The following limitiations have been identified for the Windows
+platform.<br>
+
+<br>
+
+<dd>
+<ol>
+<li>The InstallBuilder only really works for "development" images
+because it does not yet provide: 
+
+<ul>
+<li>any correct way to install images into "Program Files".</li>
+
+<li>any way to modify the registry for a given application.</li>
+
+<li>any way to do custom installation customization.</li>
+
+<li>any way to modify the user's PATH or other variables.</li>
+</ul>
+</li>
+
+<li>The InstallBuilder does not let users decide how much of the
+image they want to install. It's an all or nothing
+proposition.</li>
+
+<li>Installations do not run without the user's interaction.</li>
+
+<li>Versioning, prereqs, replaces, etc. are not supported by
+InstallBuilder.</li>
+
+<li>There is no support for shared files being installed (such as
+the C library DLL).</li>
+
+<li>InstallBuilder uses the InstallShield which comes with an MSDEV
+license. Thus InstallBuilder can only detect that the user needs to
+uninstall a previous version of the image, it can't do the
+uninstallation for the user.</li>
+</ol>
+</dd>
+
+<p></p>
+
+  <dd>The following limitiations have been identified for the Windows platform 
+    being used in conjunction with the p4 tools from <a href="http://www.perforce.com" target="_top">Perforce</a>.<br>
+
+<br>
+
+<ol>
+<li>p4 Source Control Limitation: Make sure the p4 client's root
+path is short enough. We
+recommend something like "c:/depot" or "d:/trees". If the path gets
+too long, you'll see mysterious trouble using InstallBuilder. Some
+of the InstallShield executables that InstallBuilder uses choke
+when run from directories whose names are too long. (Notably,
+"compile" will complain about bad arguments and return value
+256).</li>
+</ol>
+</dd>
+
+<p></p>
+
+<dt><b>SEE ALSO</b></dt>
+
+<p></p>
+
+  <dd><a href="ibBuild.html">ibBuild.pl</a>, <a href= 
+"ibCollect.html">ibCollect.pl</a>, <a href= 
+"ibVerifyCollection.html">ibVerifyCollection.pl</a></dd>
+</dl>
+
+<hr>
+<small>
+Last Published: <i>May 18, 2000</i><br>
+Contact: <a href="mailto:webmaster@wizzer.com">webmaster@wizzer.com</a>
+</small>
+
+</body>
+</html>

@@ -1,0 +1,58 @@
+NOCLASS
+NAME ibCollect.pl { collect information about files to be installed on the PC }
+
+SYNOPSIS {
+	perl ibCollect.pl options file ...
+}
+
+DESC {
+<C>ibCollect.pl</C> appends entries to a collection database for later
+use by <C>ibBuild.pl</C>.  A collection database entry for a file
+includes:
+<UL>
+	<LI> the path of the file to be installed (the source path)
+	<LI> the path it should be installed as,
+	<LI> and any <C>ibBuild.pl</C> "tags" it should have.
+</UL>
+
+
+
+<B>-destDir destinationDirectory</B><BR>
+The destination directory is a relative path from the top directory
+into which the installation image is installed.  This must be specified.<P>
+
+<B>-tags "tagName ..."</B><BR>
+Every file should be tagged with one or more installation tags.  These
+tags are used to decide which subsystem of your products contains the
+file.  (This is similar to idb tags on the SGI.)  These must be specified.<P>
+
+<B>-baseDir baseDirectory</B><BR>
+To avoid having absolute pathnames in the collection file.  The source
+path is recorded as a relative path from a directory known as the
+<I>base directory</I> (corresponding to <I>install</I>'s SRC directory
+on the SGI). The base directory can be provided with the <B>-baseDir</B>
+option.  If this option is not used, <C>ibCollect.pl</C> tries to get
+its value from the environment variable $IBBASEDIR.  The base
+directory must be specified one of these two ways.<P>
+
+<B>-srcDir sourceDirectory</B><BR>
+Relative source filenames are treated as being relative to
+sourceDirectory.  sourceDirectory defaults to the current working
+directory.<P>
+
+<B>-dest destinationFileName</B><BR>
+Normally, files are installed with the same name as they have in your
+file system.  If you want to install a with under a different name,
+use the -dest flag to set that name.  Note that you must specify only
+one file to if you have use this flag.<P>
+
+<B>-q</B><BR>
+Runs silently.<P>
+}
+
+ALSO {
+InstallBuilder,
+ibVerifyCollection.pl,
+ibBuild.pl,
+}
+

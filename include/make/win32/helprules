@@ -1,0 +1,73 @@
+# -*- Makefile -*-
+#
+#  Copyright (C) 2000  Wizzer Works Inc.
+#
+#  This Makefile is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation; either version 2 of the License, or
+#  any later version.
+#
+#  This Makefile is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this Makefile; if not, write to the Free Software
+#  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+#  For information concerning this Makefile, contact Mark S. Millard,
+#  of Wizzer Works Inc. at msm@wizzer.com.
+#
+#*************************************************************************
+#
+# helprules - Rules for building PC help files
+#
+# Makefiles must include $(COMMONRULES) and $(HELPRULES) AFTER the
+# first target is defined.
+#
+# $Id: helprules,v 1.1 2004/05/26 19:17:31 msm Exp $
+#
+#*************************************************************************
+
+#
+# add a helpful dependency for $(HELPPROJECT).  this file depends
+# on stuff in the makefile so we've got an unfortunate dependency
+# on the makefile itself.
+#
+$(HELPPROJECT): Makefile
+	-[ "$(HPJGEN)" ] && \
+	    $(HPJGEN) -compress $(HELPCOMPRESS) \
+		-errlog $(HELPERRLOG) \
+		-imagedirs $(HELPIMAGEDIRS) \
+		-map $(HELPMAP) \
+		-out $(HELPTARGET) \
+		-srcdir $(HELPSRCDIR) \
+		-title $(HELPTITLE) \
+		-baggage "$(HELPBAGGAGE)" \
+		-window "$(HELPWINDOWS)" \
+		$(HELPFILES) > $(HELPPROJECT)
+
+#
+# makefiles for building help should define the following:
+#
+# HELPTARGET = <file>.hlp		-- the help file to build
+# CONTENTSTARGET = <file>.cnt		-- the contents file
+# HELPFILES = <file>.rtf ...		-- the source RTF files
+#
+# makefiles may define the following if needed:
+#
+# HHFILES = <file>.h ...		-- the HH files
+# HELPTITLE = "Title for Help"		-- the help title (HCW: Options/General)
+# HELPSRCDIR = <dir>			-- the directory with the source files
+# HELPCOMPRESS = "<compression scheme>"	-- (HCW: Options/Compression)
+#	Choices: "none", "phrase", "Zeck", "phrase Zeck", "Hall", "Hall Zeck"
+#	Default: "Hall Zeck" (maximum)
+#
+
+$(HELPTARGET): $(HELPPROJECT)
+	$(HCF) $(HELPPROJECT)
+	[ ! -f $(HELPERRLOG) ] || $(WZDEV_DIR)/bin/cat $(HELPERRLOG)
+
+$(CONTENTSTARGET): $(HELPSRCDIR)/$(shell $(WZDEV_DIR)/bin/basename $(CONTENTSTARGET))
+	$(CP) -f $(HELPSRCDIR)/`$(WZDEV_DIR)/bin/basename $(CONTENTSTARGET)` $(CONTENTSTARGET)

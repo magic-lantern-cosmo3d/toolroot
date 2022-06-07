@@ -1,0 +1,394 @@
+/*---------------------------------------------------------------------------*\
+ *
+ *  Copyright (C) 2000  Wizzer Works Inc.
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ *  For information concerning this program, contact Mark S. Millard,
+ *  of Wizzer Works Inc. at msm@wizzer.com.
+ *
+ *  File Name:  ibBody.rul
+ *
+ *  Description:
+ *      Program part of an InstallShield Script for the Install Builder.
+ *      (heavily based on the InstallShield SDK Edition Template One script.)
+ *      This script has NOT been tested on Windows 95.
+ *
+ *      Author:  Mark S. Millard                 Date:  4/13/00
+ *               InstallShield Corporation       Date:  1-10-96
+ *
+ *  Comments:
+ *      This script should be included by the Install Builder's setup.rul.
+ *      It provides the script's main logic & support functions.
+ *
+ *
+\*---------------------------------------------------------------------------*/
+
+program
+
+StartHere:
+        Disable( BACKGROUND );
+
+        // Set up the installation screen.
+        SetupScreen();
+
+        // Set installation info., which is required for registry entries.
+        InstallationInfo( COMPANY_NAME, PRODUCT_NAME, PRODUCT_VERSION, PRODUCT_KEY );
+
+// Create a Welcome dialog.
+WelcomeDlg:
+        Disable( BACKBUTTON );
+        Welcome( "", 0 );
+        Enable( BACKBUTTON );
+
+        // Check that this product is not already installed!
+        CheckNotAlreadyInstalled();
+
+        // Test target system proper configuration.
+        CheckRequirements();
+
+// Ask user for a destination location for the installation.
+GetTargetDirectory:
+
+        if ( !StrCompare(DEFAULT_INSTALL_DIR, "<WINSYSDIR>") ) then
+                svMainDirectory = WINSYSDIR;
+        elseif ( !StrCompare(DEFAULT_INSTALL_DIR, "<WINDIR>") ) then
+                svMainDirectory = WINDIR;
+        else
+                // damn...ask the user!
+                svMainDirectory = TARGETDISK ^ DEFAULT_INSTALL_DIR;
+        
+                szMsg = "";
+                if ( AskDestPath( "", szMsg, svMainDirectory, 0 ) = BACK ) then
+                   goto WelcomeDlg;
+                endif;
+        endif;
+
+        nType = TYPICAL;
+
+DetermineUserSelection:
+
+        nType = TYPICAL;  // don't bother to ask! -- SetupType( "", "", svMainDirectory, nType, 0 );
+        if ( nType = BACK ) then goto GetTargetDirectory; endif;
+
+        bReshowSetupType = FALSE;
+
+        // RIGHT NOW, we always install everything we have...
+        if (bReshowSetupType = TRUE) then goto DetermineUserSelection; endif;
+
+        // Check to see if target system meets space requirements.
+        bSpaceOk = CheckSpaceRequirements( svMainDirectory );
+
+        // Ask user to try again if not enough space available.
+        if (bSpaceOk = FALSE) then goto DetermineUserSelection; endif;
+
+FolderSelection:
+        // this is where they usually let the users choose folder stuff.
+
+FileTransferSetup:
+
+        // Prepare InstallShield to record deinstallation information.
+        DeinstallStart( svMainDirectory, svUninstLogFile, UNINSTALL_KEY, 0 );
+        RegDBSetItem( REGDB_UNINSTALL_NAME, UNINSTALL_NAME );
+
+        // Define the "General" file set.
+        szFileSet = "General";
+        TARGETDIR = svMainDirectory;
+
+        FileSetBeginDefine( szFileSet );
+
+        SetStatusWindow( -1, "Copying program files..." );
+
+        DoCompressGets();
+
+        FileSetEndDefine( szFileSet );
+
+DoFileTransfer:
+        // Set up progress indicator and information gauge.
+        Enable( STATUSDLG );
+        StatusUpdate( ON, 90 );
+
+        // Perform the file set.
+        nResult = FileSetPerformEz( szFileSet, 0 );
+
+        switch (nResult)
+
+        case FS_DONE: // Successful completion.
+
+        case FS_CREATEDIR: // Create directory error.
+             MessageBox( "Unable to create a directory under " + TARGETDIR + "."+
+                         "Please check write access to this directory.", SEVERE );
+             abort;
+
+        default: // Group all other errors under default label.
+             NumToStr( szTemp, nResult );
+                 SetErrorString( nResult );
+             MessageBox( "General file transfer error."+
+                         "Please check your target location and try again.\n\n"+
+                         "       Error:"+svErrorString+" (#"+szTemp+")",
+                         SEVERE );
+
+             abort;
+        endswitch;
+
+SetRegistryEntries:
+
+        CreateRegDBEntries( );
+
+        Delay(2);
+        Disable( STATUSDLG );
+
+        // Create program groups (folders) and icons.
+
+CreateFolderIcons:
+        // this is where they usually install FolderIcons
+
+
+        // Announce setup complete and offer to read README file.
+
+        SetStatusWindow( 100, "Installation complete." );
+
+        // If shared files could not be installed, then users must restart system.
+        if (BATCH_INSTALL = TRUE) then
+           szMsg = "Some files could not be installed because they are "+
+                   "currently in use by other programs in the system.  "+
+                   "To allow for proper operation of the new program you should restart"+
+                   "your system at this time.";
+           CommitSharedFiles(0);
+           RebootDialog( "Restart Windows", szMsg, SYS_BOOTMACHINE );
+        else
+
+           szMsg = "Setup is complete";
+           MessageBeep( 0 );
+           MessageBox( szMsg, INFORMATION );
+        endif;
+
+        exit;
+
+
+/*---------------------------------------------------------------------------*\
+ *
+ * Function:  SetupScreen
+ *
+ *  Purpose:  This function will set up the screen look.  This includes
+ *            colors, fonts, text to be displayed, etc.
+ *
+ *
+ *    Input:
+ *
+ *  Returns:
+ *
+ * Comments:
+\*---------------------------------------------------------------------------*/
+
+function SetupScreen()
+        begin
+
+        Enable( INDVFILESTATUS );
+
+        SetTitle( PRODUCT_NAME + " Setup", 28, WHITE );
+
+        SetTitle( "Setup", 0, BACKGROUNDCAPTION ); // Caption bar text.
+
+        Enable( BACKGROUND );
+
+        end;
+
+
+/*---------------------------------------------------------------------------*\
+ *
+ * Function:  CheckRequirements
+ *
+ *  Purpose:  This function will check all minimum requirements for the
+ *            application being installed.  If any fail, then the user
+ *            is informed and the installation is terminated.
+ *
+ *
+ *    Input:
+ *
+ *  Returns:
+ *
+ * Comments:
+\*---------------------------------------------------------------------------*/
+
+function CheckRequirements()
+        number  nvDx, nvDy;
+        number nvResult;
+        STRING szResult;
+        BOOL  bWin95;
+        begin
+
+        bShellExplorer = FALSE;
+
+        // Assume that IS is running on Windows 95
+        bWinNT         = FALSE;
+        bWin95         = TRUE;
+
+        // Determine if target system uses NT or Windows 95.
+        GetSystemInfo( OS, nvResult, szResult );
+        if( nvResult = IS_WINDOWSNT ) then
+            bWinNT = TRUE;
+            bWin95 = FALSE;
+        endif;
+
+        // Get OSMAJOR.  IF it is Greater than/Equal to 4 OR
+        // if operating system InstallShield is running on
+        // is Windows 95, the shell interface is being used.
+
+        GetSystemInfo( OSMAJOR, nvResult, szResult );
+        if( ( nvResult >= 4 ) || ( bWin95 ) ) then
+             bShellExplorer = TRUE;
+        endif;
+
+        // Check screen resolution.
+        GetExtents( nvDx, nvDy );
+        if (nvDy < 480) then
+             MessageBox( "This program requires VGA or better resolution.", WARNING );
+             exit;
+          endif;
+
+        end;
+
+/*---------------------------------------------------------------------------*\
+ *
+ * Function:  CheckSpaceRequirements
+ *
+ *  Purpose:  This function will check space requirements based on the
+ *            elements being installed.
+ *
+ *    Input:
+ *
+ *  Returns:
+ *
+ * Comments:
+\*---------------------------------------------------------------------------*/
+
+function CheckSpaceRequirements( szDir )
+        number  nSizeRequired, index;
+        begin
+
+        nSizeRequired = 0;
+        index = 0;
+        while ( index < GetNumSubsystems() )
+            nSizeRequired = nSizeRequired + GetIthSubsystemSize(index);
+            index = index + 1;
+        endwhile;
+
+        // Check space on target drive.
+        bSpaceOk = TRUE;
+        if (GetDiskSpace( szDir ) < nSizeRequired) then
+            szMsg = "There is not enough space available on the disk\n" +
+                    "'" + svMainDirectory + "' \n" +
+                    "Please free up some space or change the target location\n" +
+                    "to a different disk";
+            MessageBeep(0);
+            MessageBox( szMsg, WARNING );
+            bSpaceOk = FALSE;
+        endif;
+
+        return bSpaceOk;
+        end;
+
+
+/*---------------------------------------------------------------------------*\
+ *
+ * Function:  CreateRegDBEntries
+ *
+ *  Purpose:  This function will create necessary keys and values for
+ *            the sample program.
+ *
+ *    Input:
+ *
+ *  Returns:
+ *
+ * Comments:
+\*---------------------------------------------------------------------------*/
+
+function CreateRegDBEntries()
+        string szKey[255], szValue, szDemo, szProgram;
+begin
+        // i don't think we have to do anything here for a development installation
+        // (unless we were installing applications)
+end;
+
+/*---------------------------------------------------------------------------*\
+ *
+ * Function:  SetErrorString
+ *
+ *  Purpose:  This function will set the global szErrorString based on errno.
+ *
+ *    Input:  errno -- an error identifier.
+ *
+ *  Returns:
+ *
+ * Comments:  I wish I could return a string from these functions!
+\*---------------------------------------------------------------------------*/
+
+function SetErrorString( errno )
+    begin
+        switch( errno ) 
+                case COMP_ERR_CREATEDIR:
+                        svErrorString = "COMP_ERR_CREATEDIR";
+                case COMP_ERR_FILENOTINLIB:
+                        svErrorString = "COMP_ERR_FILENOTINLIB";
+                case COMP_ERR_TARGETREADONLY:
+                        svErrorString = "COMP_ERR_TARGETREADONLY";
+                case COMP_ERR_INCOMPATIBLE:
+                        svErrorString = "COMP_ERR_INCOMPATIBLE";
+                case COMP_ERR_MEMORY:
+                        svErrorString = "COMP_ERR_MEMORY";
+                case COMP_ERR_NODISKSPACE:
+                        svErrorString = "COMP_ERR_NODISKSPACE";
+                case COMP_ERR_OPENINPUT:
+                        svErrorString = "COMP_ERR_OPENINPUT";
+                case COMP_ERR_OPENOUTPUT:
+                        svErrorString = "COMP_ERR_OPENOUTPUT";
+                case COMP_ERR_OPTIONS:
+                        svErrorString = "COMP_ERR_OPTIONS";
+                case COMP_ERR_TARGETREADONLY:
+                        svErrorString = "COMP_ERR_TARGETREADONLY";
+                
+                default:
+                        // (there are lots of errors i haven't added cases for!)
+                        svErrorString = "*unknown error*";
+        endswitch;
+  end;
+
+
+/*---------------------------------------------------------------------------*\
+ *
+ * Function:  CheckNotAlreadyInstalled
+ *
+ *  Purpose:  Aborts installation if a version of the product is already installed.
+ *
+ *    Input:  
+ *
+ *  Returns:
+ *
+ * Comments:  Eventually, this should at least offer to do the uninstall...
+\*---------------------------------------------------------------------------*/
+
+function CheckNotAlreadyInstalled()
+  STRING szKey;
+  begin
+        RegDBSetDefaultRoot( HKEY_LOCAL_MACHINE );
+        szKey = "\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall" ^ UNINSTALL_KEY;
+        if ( RegDBKeyExist( szKey ) >= 0 ) then
+                // the key exists, so we must have already installed this!
+                MessageBox( "You must uninstall " + UNINSTALL_KEY + 
+                                "\nbefore reinstalling it or a later version!", SEVERE);
+                abort;
+        endif;
+  end;

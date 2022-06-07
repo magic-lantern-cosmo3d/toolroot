@@ -1,0 +1,63 @@
+# -*- Makefile -*-
+#
+#  Copyright (C) 2000  Wizzer Works Inc.
+#
+#  This Makefile is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation; either version 2 of the License, or
+#  any later version.
+#
+#  This Makefile is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this Makefile; if not, write to the Free Software
+#  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+#  For information concerning this Makefile, contact Mark S. Millard,
+#  of Wizzer Works Inc. at msm@wizzer.com.
+#
+#*************************************************************************
+#
+# mandefs - Common build definitions and macros for man documentation
+#
+# This file is modeled after the mandefs file used for SGI IRIX builds.
+# Include mandefs individually in each Makefile (or, if not using
+# ismcommondefs, in your top level ismdefs file.)
+#
+# The build uses GNU make and a Bourne-compatible shell. All pathnames and
+# directories should be specified in UNIX style using the '/' separator
+# (drive letters can also be used).
+#
+# To build software on Linux you must install the Wizzer Works Toolroot.
+# Assuming the toolroot is installed in the default location /usr/local/wizzer,
+# you must put /usr/local/wizzer/InstallBuilder/bin in your PATH.
+#
+# The standard pathname for this file is:
+#
+#		/usr/local/wizzer/include/make/linux/mandefs
+#
+# If the Wizzer Works Toolroot has been installed in a location other than
+# /usr/local/wizzer, define the environment variable WZDEV_DIR with the new
+# location.
+#
+# $Id: mandefs,v 1.1 2004/05/26 19:17:30 msm Exp $
+#
+#*************************************************************************
+
+#
+# Define where to look for these files.
+#
+ifndef WZDEV_DIR
+WZDEV_DIR = /usr/local/wizzer
+endif
+
+#
+# Command definitions
+#
+GZIP		= $(TOOLROOT)/bin/gzip
+COMPRESS	= $(TOOLROOT)/usr/bin/compress
+ZIP		= $(TOOLROOT)/usr/bin/zip
+BZIP2		= $(TOOLROOT)/usr/bin/bzip2

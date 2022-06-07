@@ -1,0 +1,40 @@
+This file contains instructions for building the Wizzer Works Toolroot
+installation packages.
+
+Dependencies
+
+1. Perl must first be installed. ActivePerl can be installed from
+   <workarea>/pc/devtools/ActivePerl-5.6.1.633-MSWin32-x86.msi.
+
+Note: <workarea> is where the toolroot has been checked-out to. For example,
+<workarea> might be E:\Auteur\toolroot.
+
+Instructions
+
+1. Open a bash shell window. Bash can be found in the <workarea>\pc\bin
+   directory.
+
+2. Update the PATH environment variable to include the Perl bin directory
+   as well as the two PC bin directories. For example:
+
+SET PATH=.;E:\Auteur\toolroot\pc\bin;E:\Auteur\toolroot\pc\bin2;C:\Perl\bin
+
+3. Change the working directory to <workarea>\pc\build.
+
+4. run "make"
+
+5. This will build six Installshield packages:
+
+wz_toolroot_Install.exe           Installs everthing except the extra tools
+                                  and the InstallShield tools.
+wz_toolroot_base_Install.exe      Installs the base toolroot.
+wz_toolroot_doc_Install.exe       Installs the toolroot documentation.
+wz_toolroot_examples_Install.exe  Installs the toolroot examples.
+wz_toolroot_extras_Install.exe    Installs the extra tools.
+wz_toolroot_is5_Install.exe       Installs the InstallShiled tools.
+
+6. To clean-up the environment, run "make clobber"
+
+Note: A batch script is made available under <workarea>\pc\cmd to help
+set-up this environment. It is called wztools.bat. Modify it to reflect
+your environment.

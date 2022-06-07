@@ -1,0 +1,6 @@
+#
+# %build section of RPM spec file.
+#
+%build
+
+echo "Nothing to build for this package."

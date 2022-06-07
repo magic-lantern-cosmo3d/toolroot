@@ -1,0 +1,6 @@
+#
+# Template for "Install" section of RPM spec files.
+#
+%install
+
+make install

@@ -1,0 +1,292 @@
+# -*- Makefile -*-
+#
+#  Copyright (C) 2000  Wizzer Works Inc.
+#
+#  This Makefile is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation; either version 2 of the License, or
+#  any later version.
+#
+#  This Makefile is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this Makefile; if not, write to the Free Software
+#  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+#  For information concerning this Makefile, contact Mark S. Millard,
+#  of Wizzer Works Inc. at msm@wizzer.com.
+#
+#*************************************************************************
+#
+# installversionrules - Rules for a particular version's install directory
+#
+# $Id: installversionrules,v 1.1 2004/05/26 19:17:31 msm Exp $
+#
+#*************************************************************************
+
+#
+# This rule removes the collection logs 
+#
+cleanCollection:
+	$(RM) $(COLLECTLOG) $(LDIRT)
+
+verifyCollection:
+	LANG_CODE=$(LANG_CODE) $(IBVERIFYCOLLECT) $(MASTERCOLLECTLOG) $(COLLECTLOG)
+
+#
+# When making images, make sure that the ISM_VERSION is put into the
+# environment so that the spec file can use it!
+#
+ALLCOLLECTLOGS	= \
+	$(MASTERCOLLECTLOG)
+
+ifneq ($(LEAF_DEPTH),.)
+ALLCOLLECTLOGS	+= \
+	$(LEAF_DEPTH)/$(MASTERCOLLECTLOG)
+endif
+
+ifdef EXTRACOLLECTLOG
+ALLCOLLECTLOGS	+= \
+	$(EXTRACOLLECTLOG)
+endif
+
+images:
+	@collect=""; \
+	for F in $(ALLCOLLECTLOGS); do \
+	   [ -f $$F ] && collect="$$collect -collect $$F"; \
+	done; \
+	ISM_VERSION=$(ISM_VERSION) LANG_CODE=$(LANG_CODE) $(IBBUILD) \
+		-spec $(LEAF_DEPTH)/$(SPECFILE) $$collect \
+		-ibDir $(IBDIR) 
+
+all collect:
+	@echo -n
+
+is5images: is5Compile is5BuildIFTW is5BuildCD is5ExeBuild is5IFTW
+
+#
+# Compile the IS5 Setup
+#
+is5Compile: generateFileLists editStringTable snarfIncludeFiles
+	cd "$(LEAF_DEPTH)/$(IS5PROJECT)/script files"; \
+	$(IS5COMPILE) $(IS5DEFS) Setup.rul
+
+#
+# Build the IS5 Media
+# "is5BuildIFTW" generates IFTW Media, "is5BuildCD" generates CD-ROM Media.
+#
+is5BuildIFTW:
+	[ ! -d "$(LEAF_DEPTH)/$(IS5PROJECT)/media/$(IS5MEDIA)/disk images/disk1" ] || \
+	   rm -f "$(LEAF_DEPTH)/$(IS5PROJECT)/media/$(IS5MEDIA)/disk images/disk1"/*
+	#
+	IS5SETUP="`echo \`pwd2\`/$(LEAF_DEPTH)/$(IS5PROJECT) | $(SED) 's#/#\\\\#g'`"; \
+	   $(IS5BUILD) -m$(IS5MEDIA) -p$$IS5SETUP
+
+is5BuildCD:
+	[ ! -d "$(LEAF_DEPTH)/$(IS5PROJECT)/media/$(IS5MEDIA)-cd/disk images/disk1" ] || \
+	   rm -fr "$(LEAF_DEPTH)/$(IS5PROJECT)/media/$(IS5MEDIA)-cd/disk images/disk1"/*
+	#
+	IS5SETUP="`echo \`pwd2\`/$(LEAF_DEPTH)/$(IS5PROJECT) | $(SED) 's#/#\\\\#g'`"; \
+	   $(IS5BUILD) -m$(IS5MEDIA)-cd -p$$IS5SETUP
+
+#
+# Build the Self-extracting EXE
+#
+# is5ExeBuild:
+# 	IS5SETUP="`echo \`pwd2\`/$(LEAF_DEPTH)/$(IS5PROJECT) | $(SED) 's#/#\\\\#g'`"; \
+# 	echo "[Exe Builder]" > exebuild.ini; \
+# 	echo "SrcDir=$$IS5SETUP\media\$(IS5MEDIA)\disk images\disk1" >> exebuild.ini
+# 	echo "DestDir=`pwd2 | $(SED) 's#/#\\\\#g'`" >> exebuild.ini
+# 	echo "CmdLine=setup.exe" >> exebuild.ini
+# 	echo "Password=" >> exebuild.ini
+# 	echo "Title=" >> exebuild.ini
+# 	echo "Compress=0" >> exebuild.ini
+# 	$(EXEBUILD) `pwd2`/exebuild.ini
+# 	$(RM) exebuild.ini
+# 	#
+# 	$(MV) SETUPEX.EXE $(IS5PRODUCT)Install.exe
+
+is5ExeBuild:
+	IS5SETUP="`echo \`pwd2\`/$(LEAF_DEPTH)/$(IS5PROJECT) | $(SED) 's#/#\\\\#g'`"; \
+	echo "[PackageForTheWeb]" > $(IS5PROJECT).pfw; \
+	echo "Version=2.0" >> $(IS5PROJECT).pfw; \
+	echo "" >> $(IS5PROJECT).pfw; \
+	echo "[Options]" >> $(IS5PROJECT).pfw; \
+	echo "Title=$(IS5PRODUCT)" >> $(IS5PROJECT).pfw; \
+	echo "Company=$(COMPANY_NAME)" >> $(IS5PROJECT).pfw; \
+	echo "CompanyEMail=" >> $(IS5PROJECT).pfw; \
+	echo "BasePath=$$IS5SETUP\media\$(IS5MEDIA)\disk images\disk1" >> $(IS5PROJECT).pfw; \
+	echo "ImportPath=$$IS5SETUP\media\$(IS5MEDIA)" >> $(IS5PROJECT).pfw
+	echo "UseRTF=0" >> $(IS5PROJECT).pfw	# Rich Text File for Welcome
+	echo "SaveFiles=0" >> $(IS5PROJECT).pfw
+	echo "SubFolders=0" >> $(IS5PROJECT).pfw	# No sub-folders
+	echo "ApplicationName=$(IS5PRODUCT)" >> $(IS5PROJECT).pfw
+	echo "Description=$(IS5PRODUCT) $(ISM_VERSION)" >> $(IS5PROJECT).pfw
+	echo "Comments=" >> $(IS5PROJECT).pfw
+	echo "Notice=" >> $(IS5PROJECT).pfw
+	echo "Version=$(ISM_VERSION)" >> $(IS5PROJECT).pfw
+	echo "OutputSpec=`echo \`pwd2\` | $(SED) 's#/#\\\\#g'`\SETUPEX.EXE" >> $(IS5PROJECT).pfw
+	echo "GUIDs=0" >> $(IS5PROJECT).pfw	# Scan for GUIDs
+	echo "Type=2" >> $(IS5PROJECT).pfw
+	echo "Compress=1" >> $(IS5PROJECT).pfw
+	echo "Sign=0" >> $(IS5PROJECT).pfw
+	echo "Transfer=0" >> $(IS5PROJECT).pfw
+	echo "Files=0" >> $(IS5PROJECT).pfw	# Number of Files
+	echo "" >> $(IS5PROJECT).pfw
+	echo "[Engine]" >> $(IS5PROJECT).pfw
+	echo "Setup=SETUP.EXE" >> $(IS5PROJECT).pfw
+	echo "" >> $(IS5PROJECT).pfw
+	echo "[Web Page]" >> $(IS5PROJECT).pfw
+	echo "Generate=1" >> $(IS5PROJECT).pfw
+	echo "Template=" >> $(IS5PROJECT).pfw
+	echo "MSClient=" >> $(IS5PROJECT).pfw
+	echo "NClient=" >> $(IS5PROJECT).pfw
+	echo "" >> $(IS5PROJECT).pfw
+	echo "[Runtime]" >> $(IS5PROJECT).pfw
+	echo "Welcome=" >> $(IS5PROJECT).pfw
+	echo "License=" >> $(IS5PROJECT).pfw
+	echo "Prompt=" >> $(IS5PROJECT).pfw
+	echo "Password=" >> $(IS5PROJECT).pfw
+	echo "DefaultPath=" >> $(IS5PROJECT).pfw
+	echo "Language=" >> $(IS5PROJECT).pfw
+	echo "WindowStyle=0" >> $(IS5PROJECT).pfw
+	echo "Options=34" >> $(IS5PROJECT).pfw
+	echo "Execute=SETUP.EXE" >> $(IS5PROJECT).pfw
+	echo "CmdLine=/SMS" >> $(IS5PROJECT).pfw
+	echo "" >> $(IS5PROJECT).pfw
+	echo "[Extension]" >> $(IS5PROJECT).pfw
+	echo "Server=" >> $(IS5PROJECT).pfw
+	echo "Calls=0" >> $(IS5PROJECT).pfw
+	echo "" >> $(IS5PROJECT).pfw
+	echo "[Code Signing]" >> $(IS5PROJECT).pfw
+	echo "CompanyURL=" >> $(IS5PROJECT).pfw
+	echo "SpecFile=" >> $(IS5PROJECT).pfw
+	echo "KeyFile=" >> $(IS5PROJECT).pfw
+	echo "Method=0" >> $(IS5PROJECT).pfw
+	echo "" >> $(IS5PROJECT).pfw
+	$(IS5PFTW) "`echo \`pwd2\` | $(SED) 's#/#\\\\#g'`/$(IS5PROJECT).pfw" -s -a
+	#
+	$(MV) SETUPEX.EXE $(IS5PRODUCT)Install.exe
+
+is5IFTW:
+	IS5SETUP="`echo \`pwd2\`/$(LEAF_DEPTH)/$(IS5PROJECT) | $(SED) 's#/#\\\\#g'`"; \
+	echo "[InstallFromTheWeb]" > $(IS5PROJECT).ifw; \
+	echo "Version=2.2" >> $(IS5PROJECT).ifw; \
+	echo "" >> $(IS5PROJECT).ifw; \
+	echo "[Options]" >> $(IS5PROJECT).ifw; \
+	echo "Title=$(IS5PRODUCT)" >> $(IS5PROJECT).ifw; \
+	echo "Company=$(COMPANY_NAME)" >> $(IS5PROJECT).ifw; \
+	echo "CompanyEMail=" >> $(IS5PROJECT).ifw; \
+	echo "BasePath=$$IS5SETUP\media\$(IS5MEDIA)\disk images\disk1" >> $(IS5PROJECT).ifw; \
+	echo "ImportPath=$$IS5SETUP\media\$(IS5MEDIA)" >> $(IS5PROJECT).ifw
+	echo "UseRTF=0" >> $(IS5PROJECT).ifw
+	echo "SaveFiles=0" >> $(IS5PROJECT).ifw
+	echo "SubFolders=1" >> $(IS5PROJECT).ifw
+	echo "ApplicationName=$(IS5PRODUCT)" >> $(IS5PROJECT).ifw
+	echo "Description=$(IS5PRODUCT) $(ISM_VERSION)" >> $(IS5PROJECT).ifw
+	echo "Comments=" >> $(IS5PROJECT).ifw
+	echo "Notice=" >> $(IS5PROJECT).ifw
+	echo "Version=$(ISM_VERSION)" >> $(IS5PROJECT).ifw
+	echo "OutputPath=" >> $(IS5PROJECT).ifw
+	echo "InstallOnly=1" >> $(IS5PROJECT).ifw
+	echo "InstallSave=1" >> $(IS5PROJECT).ifw
+	echo "SaveOnly=1" >> $(IS5PROJECT).ifw
+	echo "Type=2" >> $(IS5PROJECT).ifw
+	echo "Compress=1" >> $(IS5PROJECT).ifw
+	echo "Sign=0" >> $(IS5PROJECT).ifw
+	echo "Transfer=1" >> $(IS5PROJECT).ifw
+	echo "Files=0" >> $(IS5PROJECT).ifw		# Number of Files
+	echo "" >> $(IS5PROJECT).ifw
+	echo "[Engine]" >> $(IS5PROJECT).ifw
+	echo "Setup=SETUP.EXE" >> $(IS5PROJECT).ifw
+	echo "Intl=0" >> $(IS5PROJECT).ifw
+	echo "" >> $(IS5PROJECT).ifw
+	echo "[Web Page]" >> $(IS5PROJECT).ifw
+	echo "Generate=1" >> $(IS5PROJECT).ifw
+	echo "Template=C:\Program Files\InstallShield\InstallFromTheWeb 2\iftw.htm" >> $(IS5PROJECT).ifw
+	echo "MSClient=http://www.installfromtheweb.com/install/iftwclix.cab" >> $(IS5PROJECT).ifw
+	echo "NClient=http://www.installfromtheweb.com/install/iftwcli.exe" >> $(IS5PROJECT).ifw
+	echo "" >> $(IS5PROJECT).ifw
+	echo "[Runtime]" >> $(IS5PROJECT).ifw
+	echo "Welcome=" >> $(IS5PROJECT).ifw
+	echo "License=" >> $(IS5PROJECT).ifw
+	echo "Prompt=" >> $(IS5PROJECT).ifw
+	echo "Password=starfish" >> $(IS5PROJECT).ifw
+	echo "DefaultPath=" >> $(IS5PROJECT).ifw
+	echo "Language=" >> $(IS5PROJECT).ifw
+	echo "WindowStyle=0" >> $(IS5PROJECT).ifw
+	echo "Options=48" >> $(IS5PROJECT).ifw
+	echo "" >> $(IS5PROJECT).ifw
+	echo "[Code Signing]" >> $(IS5PROJECT).ifw
+	echo "CompanyURL=http://www.veridicom.com" >> $(IS5PROJECT).ifw
+	echo "SpecFile=" >> $(IS5PROJECT).ifw     
+	echo "KeyFile=" >> $(IS5PROJECT).ifw      
+	echo "Method=0" >> $(IS5PROJECT).ifw      
+	echo "" >> $(IS5PROJECT).ifw
+	echo "[SetupGroups]" >> $(IS5PROJECT).ifw
+	echo "Count=1" >> $(IS5PROJECT).ifw
+	echo "Group1=Main Sites" >> $(IS5PROJECT).ifw
+	echo "" >> $(IS5PROJECT).ifw
+	echo "[Main Sites]" >> $(IS5PROJECT).ifw
+	echo "Name1=Santa Clara, CA" >> $(IS5PROJECT).ifw
+	echo "URL1=http://softdev/releaseImages/$(DATESFX)/$(PREF_VERSION)/iftw/$(IS5PRODUCT)" >> $(IS5PROJECT).ifw
+	echo "UpdateURL1=ftp://" >> $(IS5PROJECT).ifw
+	echo "UpdatePath1=`echo \`pwd2\`/iftw | $(SED) 's#/#\\\\#g'`" >> $(IS5PROJECT).ifw
+	echo "User1=" >> $(IS5PROJECT).ifw
+	echo "Password1=" >> $(IS5PROJECT).ifw
+	echo "FtpDir1=" >> $(IS5PROJECT).ifw
+	echo "Flags1=2" >> $(IS5PROJECT).ifw
+	echo "" >> $(IS5PROJECT).ifw
+	echo "[SetupTypes]" >> $(IS5PROJECT).ifw
+	echo "Name1=Default" >> $(IS5PROJECT).ifw
+	echo "Desc1=This is a standard, fully interactive setup." >> $(IS5PROJECT).ifw
+	echo "Cmd1=SETUP.EXE" >> $(IS5PROJECT).ifw
+	echo "Param1=/SMS /Zi" >> $(IS5PROJECT).ifw
+	echo "Flags1=0" >> $(IS5PROJECT).ifw
+	echo "" >> $(IS5PROJECT).ifw
+	[ -d iftw ] || $(MKDIR) iftw
+	$(IS5IFTW) "`echo \`pwd2\` | $(SED) 's#/#\\\\#g'`/$(IS5PROJECT).ifw" -s -a
+
+#
+# Generates the InstallShield5 file group lists (.fgl) from $(ALLCOLLECTLOGS)
+#
+generateFileLists:
+	@collect=""; \
+	for F in $(ALLCOLLECTLOGS); do \
+	   [ -f $$F ] && collect="$$collect -collect $$F"; \
+	done; \
+	LANG_CODE=$(LANG_CODE) $(IBMAKEFILEGROUPS) \
+		$$collect -outputDir \
+		$(LEAF_DEPTH)/$(IS5PROJECT)/file\ groups
+
+#
+# Edits the InstallShield5 String Table (value.shl) to assign $(ISM_ALPHANUM)
+# to variable CHANGE_NUMBER ...
+#
+editStringTable:
+	@#[ ! -w "$(LEAF_DEPTH)/$(IS5PROJECT)/string tables/0009-english/value.shl" ]
+	@#Need to use following perl to workaround bash problem
+	perl -e 'exit (! !-w qq($(LEAF_DEPTH)/$(IS5PROJECT)/string tables/0009-english/value.shl) );'
+	@p4 refresh "$(LEAF_DEPTH)/$(IS5PROJECT)/string tables/0009-english/value.shl" > NUL
+ifneq ($(strip $(ISM_ALPHANUM)),)
+	@chmod +w "$(LEAF_DEPTH)/$(IS5PROJECT)/string tables/0009-english/value.shl"
+	$(SED) "/^CHANGE_NUMBER=/s/=.*$$/=$(ISM_ALPHANUM)/" \
+	   "$(LEAF_DEPTH)/$(IS5PROJECT)/string tables/0009-english/value.shl" > $@.tmp; \
+	   mv $@.tmp "$(LEAF_DEPTH)/$(IS5PROJECT)/string tables/0009-english/value.shl"
+	@chmod -w "$(LEAF_DEPTH)/$(IS5PROJECT)/string tables/0009-english/value.shl"
+endif
+
+#
+# Since IS5 Compile.exe doesn't support multiple [-i] options, we copy all
+# required *.{h,rul} files to be in same directory as "Setup.rul".
+#
+snarfIncludeFiles:
+	$(SHELL) -ec 'for file in licendef.h license.rul; do \
+		$(CP) $(WZDEV_DIR)/include/license/$$file "$(LEAF_DEPTH)/$(IS5PROJECT)/script files"; \
+		done'
+	$(SHELL) -ec 'for file in WaitForSetup.h WaitForSetup.rul IS5Include.h IS5Include.rul; do \
+		$(CP) $(WZDEV_DIR)/include/installshield/$$file "$(LEAF_DEPTH)/$(IS5PROJECT)/script files"; \
+		done'

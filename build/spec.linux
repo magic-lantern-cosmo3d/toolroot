@@ -1,0 +1,10 @@
+#InstallBuilder Spec 1.0
+
+product wz_toolroot 0.6
+    uiName Cross Platform Build Environment
+    defaultInstallDir /usr/local
+    subsys base
+        uiName Cross Platform Build Environment Tools
+        export TOOL
+    endsubsys
+endproduct

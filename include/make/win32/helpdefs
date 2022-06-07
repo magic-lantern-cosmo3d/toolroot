@@ -1,0 +1,91 @@
+# -*- Makefile -*-
+#
+#  Copyright (C) 2000  Wizzer Works Inc.
+#
+#  This Makefile is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation; either version 2 of the License, or
+#  any later version.
+#
+#  This Makefile is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this Makefile; if not, write to the Free Software
+#  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+#  For information concerning this Makefile, contact Mark S. Millard,
+#  of Wizzer Works Inc. at msm@wizzer.com.
+#
+#*************************************************************************
+#
+# helpdefs - Definitions and macros for building PC help files
+#
+# $Id: helpdefs,v 1.1 2004/05/26 19:17:31 msm Exp $
+#
+#*************************************************************************
+
+#
+# Command definitions.
+#
+HC		= hcrtf.exe
+HPJGEN		= $(PERL) $(WZDEV_DIR)/bin/hpjgen.pl
+
+#
+# Command definitions with flags
+#
+HCF		= $(HC) $(HCFLAGS)
+
+#
+# Help compiler flags
+#
+HCFLAGS		= $(GHCOPTS) $(IHCOPTS) $(LHCOPTS) $(VHCOPTS)
+
+#
+# global help compiler flags:
+#	-xn: non-interactive compile
+#
+GHCOPTS		= -xn
+
+#
+# stuff for the help project
+#
+HELPTITLE	= "Untitled"
+HELPCOMPRESS	= "Hall Zeck"
+HELPSRCDIR	= "."
+HELPIMAGEDIRS	= "."
+HELPERRLOG	= help.err
+HELPWINDOWS	= ""
+HELPBAGGAGE	= ""
+HELPMAP		= ""
+
+#
+# cruft created by help rules
+#
+HPJDIRT		= *.hpj *.HPJ
+GDIRT		+= *.err *.fts *.gid *.rbh *.rta *.rtk *.rts \
+		   *.ERR *.FTS *.GID *.RBH *.RTA *.RTK *.RTS \
+		   $(HPJDIRT)
+
+#
+# target help project
+#
+HELPPROJECT = $(shell $(WZDEV_DIR)/bin/basename $(HELPTARGET:.hlp=.hpj))
+
+#
+# construct full targets list from individual targets
+#
+TARGETS = $(HELPTARGET) $(CONTENTSTARGET)
+
+
+# to override the autogeneration of the help project file, define the
+# following macros:
+#	HELPPROJECT = myname.hpj
+#	HPJDIRT =
+#	HPJGEN =
+# the default project name is HELPTARGET with .hlp replaced by .hpj;
+# if this is satisfactory then you needn't define HELPPROJECT.  You
+# *must* define HPJDIRT and HPJGEN as empty, otherwise your project
+# file may get clobbered.

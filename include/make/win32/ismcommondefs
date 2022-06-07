@@ -1,0 +1,235 @@
+# -*- Makefile -*-
+#
+#  Copyright (C) 2000  Wizzer Works Inc.
+#
+#  This Makefile is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation; either version 2 of the License, or
+#  any later version.
+#
+#  This Makefile is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this Makefile; if not, write to the Free Software
+#  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+#  For information concerning this Makefile, contact Mark S. Millard,
+#  of Wizzer Works Inc. at msm@wizzer.com.
+#
+#*************************************************************************
+#
+# ismcommondefs - Common build definitions and macros for ISMs
+#                 (Note: includes commondefs!)
+#
+# This file contains definitions that should be common to all
+# Makefiles for a particular ISM.  This file automatically includes
+# 'commondefs' as well.  The ismcommondefs file adds definitions that
+# require an ISM-like structure to exist (e.g. ISM_DEPTH must be
+# defined for each Makefile).  Include ismcommondefs either in your
+# top level ismdefs file or individually in each Makefile.
+#
+# By using ismcommondefs instead of commondefs, you get additional
+# definitions for using "fakemake", a utility that makes a .mak file
+# that MSDEV likes, and for using "installBuilder", a nice utility for
+# creating InstallSHIELD images of your ISM.
+#
+# **Note, however, to use this file, the following variables MUST be
+# defined before this file is (eventually) included:
+#
+#	WZDEV_DIR
+#	ISM_DEPTH
+#	ISM_NAME
+#	ISM_VERSION
+#	ISM_TIMEBOMB_DATE
+#
+# The build uses GNU make and the GNU bash shell. All pathnames and
+# directories should be specified in UNIX style using the '/' separator
+# (drive letters can also be used).
+#
+# To build software on the PC you must install the Wizzer Works Toolroot.
+# Assuming the toolroot is installed in the default location C:/wizzer,
+# you must put C:\wizzer\InstallBuild\bin in your PATH
+# (in addition to having C:\MSDEV\BIN in your path).
+#
+# The standard pathname for this file is:
+#
+#		C:/wizzer/include/make/ismcommondefs
+#
+# If the Wizzer Works Toolroot has been installed in a location other than
+# C:/wizzer, define the environment variable WZDEV_DIR with the new
+# location.
+#
+# $Id: ismcommondefs,v 1.1 2004/05/26 19:17:31 msm Exp $
+#
+#*************************************************************************
+
+#
+# First, bring in commondefs
+#
+include $(WZDEV_DIR)/include/make/commondefs
+
+#
+# Point to ismcommonrules
+# (MUST DO THIS AFTER the first target is defined)
+#
+ISMCOMMONRULES = $(WZDEV_DIR)/include/make/ismcommonrules
+
+
+########################################
+#
+# Setup the fakemake database and makefile name
+#
+ifndef FAKEDB
+FAKEDB = $(ISM_DEPTH)/FakeMakedb
+endif
+
+ifndef FAKEMAKEFILE
+  ifdef WZDEV_MSDEV5
+    ifdef ISM_NAME
+      FAKEMAKEFILE = $(ISM_DEPTH)/$(ISM_NAME).dsw
+    else # ISM_NAME
+      FAKEMAKEFILE = $(ISM_DEPTH)/FakeMake.dsw
+    endif # ISM_NAME
+  else # WZDEV_MSDEV5
+    ifdef ISM_NAME
+      FAKEMAKEFILE = $(ISM_DEPTH)/$(ISM_NAME).mak
+    else # ISM_NAME
+      FAKEMAKEFILE = $(ISM_DEPTH)/FakeMake.mak
+    endif # ISM_NAME
+  endif # WZDEV_MSDEV5
+endif # FAKEMAKEFILE
+
+# This is the default exclusion list for files that appear in .dep files
+# The default eliminates things in the msdev dir, and file named stdafx.h,
+# the devstudio dir, and the WZDEV dir from the list of dependent files.
+# To add to this list, add parenthesized expressions, separated by spaces (as below)
+# All the expressions will be '|'d together, and made into one.
+# be sure to double-escape your backslashes.  This means that to actually 
+# exclude one backslash, you need to include "\\\\" in the string.
+# The backslashes in DOS pathnames are already converted to UNIX slashes for
+# the comparison, to avoid the need for this heanous construct.
+FM_EXCLUDE = (/msdev/|/devstudio/|/WZDEV/) (stdafx)
+
+########################################
+#
+# Install Builder defs and commands
+#
+
+#
+# The install builder needs to know the top of the tree
+#
+IBBASEDIR = $(ISM_DEPTH)
+
+#
+#  Path to installBuilder tools
+#
+IBDIR = $(WZDEV_DIR)/installBuilder
+
+#
+#  Command for making install collections:
+#
+IBCOLLECT = perl -w $(IBDIR)/bin/ibCollect.pl -baseDir $(IBBASEDIR)
+
+#
+#  Command for verifying install collections:
+#
+IBVERIFYCOLLECT = perl -w $(IBDIR)/bin/ibVerifyCollection.pl
+
+#
+#  Command for generating installShield5 file group lists
+#
+IBMAKEFILEGROUPS = perl -w $(IBDIR)/bin/ibMakeFileGroups.pl -baseDir $(IBBASEDIR)
+
+#
+#  Command for building the installer
+#
+IBBUILD = perl -w $(IBDIR)/bin/ibBuild.pl -target windows -baseDir $(IBBASEDIR)
+
+#
+#  Commands for InstallShield5 Commands and EXE Builder Exebuild.exe
+#
+
+ifndef IS5DRIVE
+IS5DRIVE=c
+endif
+
+IS5COMPILE = $(IS5DRIVE):/Program\ Files/InstallShield/InstallShield\ 5.1\ Professional\ Edition/Program/Compile.exe
+IS5BUILD = $(IS5DRIVE):/Program\ Files/InstallShield/InstallShield\ 5.1\ Professional\ Edition/Program/ISBuild.exe
+
+IS5DEFS = -g -i"$(IS5DRIVE):/Program Files/InstallShield/InstallShield 5.1 Professional Edition/include" -d"SERIAL_NUM_PREFIX=\"$(SERIAL_NUM_PREFIX)\"" -d"SERIAL_NUM=\"$(SERIAL_NUM)\""
+
+EXEBUILD = $(IBDIR)/installShieldBin/exebuild
+IS5PFTW	= $(IS5DRIVE):/Program\ Files/InstallShield/PackageForTheWeb\ 2/pftwwiz.exe
+IS5IFTW	= $(IS5DRIVE):/Program\ Files/InstallShield/InstallFromTheWeb\ 2/iftwwiz.exe
+
+#
+# Command to decide where to locate a dll in memory
+#   (note: you need dllBases.txt to be a file as described in
+#          the documentation for /BASE on the linker!
+#          you can use calcDllBases.pl to make such a file!)
+#
+# Tell the linker where to find the base offset for the plugin! 
+# use this in your link lines to find the offset of your dll:
+#   $(LD) .... `$(BASEADDR) $(SHORTNAME)`
+# $(SHORTNAME) should be the name used to represent your dll/exe in dllBase.
+#
+BASEADDR = $(PERL) $(WZDEV_DIR)/bin/findBaseAddr.pl $(ISM_DEPTH)/dllBases-$(CUR_VERSION).txt
+
+#
+#  Collection log files.  Note that ISM_BUILDDIR, COLLECTLOG, and
+#  MASTERCOLLECTLOG can be overridden.
+#
+ISM_BUILDDIR = $(ISM_DEPTH)/build
+SPECFILE = spec.dat
+COLLECTLOG = collect.raw
+MASTERCOLLECTLOG = collect.master
+CUR_COLLECTLOG = $(ISM_BUILDDIR)/$(CUR_VERSION)/$(COLLECTLOG)
+COMMON_COLLECTLOG = $(ISM_BUILDDIR)/$(COLLECTLOG)
+ALL_COLLECTLOGS = $(COMMON_COLLECTLOG) $(ISM_BUILDDIR)/*/$(COLLECTLOG)
+
+#
+# Add the ISM_VERSION to the mainstream build defs
+#
+ICDEFS = -D"ISM_VERSION"="\"$(ISM_VERSION)\"" \
+	 -D"ISM_ALPHANUM"="\"$(ISM_ALPHANUM)\""
+ICXXDEFS = -D"ISM_VERSION"="\"$(ISM_VERSION)\"" \
+	   -D"ISM_ALPHANUM"="\"$(ISM_ALPHANUM)\""
+
+#
+# Time bomb support macros
+#
+ifdef ISM_TIMEBOMB_DATE
+ICDEFS += -DISM_TIMEBOMB_DATE="\"$(ISM_TIMEBOMB_DATE)\""
+ICXXDEFS += -DISM_TIMEBOMB_DATE="\"$(ISM_TIMEBOMB_DATE)\""
+endif
+
+# Company name
+ifndef COMPANY_NAME
+COMPANY_NAME = "Veridicom, Inc"
+endif
+
+# Company ID (for Registry Key and other less verbose uses)
+ifndef COMPANY_ID
+COMPANY_ID = "VeridicomSoftware"
+endif
+
+#*************************************************************************
+#
+# definitions for resource version generation
+#
+#*************************************************************************
+
+RC_VERSION_GENERATOR = perl $(WZDEV_DIR)/bin/genversionrc.pl
+RC_VERSION_RC   = version.rc
+RC_VERSION_RES  = version.res
+RC_VERSION_OPTS = $(LEAF_DEPTH)/$(RC_VERSION_RC)
+GDIRT          += $(LEAF_DEPTH)/$(RC_VERSION_RC)
+
+# you can override these but here are some reasonable defaults
+#   override RC_PRODUCT_VERSION in ismdefs
+#   override RC_FILE_VERSION in leafdefs
+RC_PRODUCT_VERSION = $(ISM_VERSION)
+RC_FILE_VERSION    = $(ISM_VERSION)

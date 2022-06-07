@@ -1,0 +1,94 @@
+NOCLASS
+NAME InstallBuilder { system for building installable images on the PC }
+
+DESC {
+
+InstallBuilder is a system for automatically creating
+self-extracting installers for the Windows platform.  It consists of
+several executables and a process for using them.  It is a very
+simplified version of SGI's system for making "inst" images.  In this
+document, we will point out the rough correspondances between parts of
+InstallBuilder and parts of SGI's "inst"-making process.<P>
+
+The system consists of the following parts:<P>
+<UL>
+  <LI> <C>ibCollect.pl</C> records which files should be installed and where.
+    It corresponds to install's use during "make rawidb" on the SGI.
+  <LI> <C>ibVerifyCollection.pl</C> compares a collection of files to be
+    installed against a master list. It generates "missing" and "extra"
+    files to record any differences. This corresponds to "idbjoin"
+    on the SGI.
+
+  <LI> <C>ibBuild.pl</C> generates an executable for each product listed
+    in the product specification ("spec") file.  When run, this
+    executable will extract from itself and run an InstallShield
+    installer for that product.
+</UL>
+}
+
+MISC Usual Process {
+Following the Starfish guidelines for the PC, InstallBuilder is
+usually part of your PC ISM's make structure. (XXX: link here!)<P>
+<UL>
+  <LI> "make all" from the top of your PC ISM.  This ensures
+    that all of your targets are up-to-date.
+
+  <LI> "make rawidb" from the top of your PC ISM.  This
+    does three things:
+      <UL>
+      <LI> First, it empties out "collect.raw" in your <I>build</I> directory.
+
+      <LI> Second, it invokes "make collect" recursively.
+        In each of your leaf directories, the collect rule should invoke
+        <C>ibCollect.pl</C>, causing it to add an entry to a
+	"collect.raw" file in your <I>build</I> directory.
+
+      <LI> Third, it runs the verifyCollection target in your
+        <I>build</I> directory.  This uses <C>ibVerifyCollection.pl</C>
+	to compare "collect.raw" file to "collect.master" file.
+	(NOTE: "collect.raw" corresponds to SGI's "IDB",
+	 "collect.master" to "idb", and "ibVerifyCollection.pl" to "gendist".
+	 Also note that when you are using "versions", you will
+	 probably have several "collect.raw" and "collect.master" pairs --
+	 one pair for files common to all versions and a pair for each
+	 version.
+     </UL>
+
+  <LI> "make images" from the top of your PC ISM.  This runs
+"make images" in your <I>build</I> directory.  This rule
+invokes <C>ibBuild.pl</C>, which uses your product specification
+("spec") and "collect.master" files to build a self extracting
+installer. See the man page for <C>ibBuild.pl</C> for more information.
+</UL>
+}
+
+MISC Known Limitations {
+<UL>
+<LI>The InstallBuilder only really works for "development" images
+because it does not yet provide:
+	<UL>
+	  <LI> any correct way to install images into "Program Files".
+	  <LI> any way to modify the registry for a given application.
+	  <LI> any way to do custom installation customization.
+	  <LI> any way to modify the user's PATH or other variables.
+	</UL>
+<LI> The InstallBuilder does not let users decide how much of the image
+they want to install.  It's an all or nothing proposition.
+<LI> Installations do not run without the user's interaction.
+<LI> Versioning, prereqs, replaces, etc. are not supported by InstallBuilder.
+<LI> There is no support for shared files being installed (such as the C
+library DLL).
+<LI> Since we are using the InstallShield which comes with our MSDEV licenses,
+InstallBuilder can only detect that the user needs to uninstall a
+previous version of the image, it can't do the uninstallation for the
+user.
+<LI> MAKE SURE YOUR p4 CLIENT's ROOT PATH IS SHORT ENOUGH. We recommend something like "c:/depot" or "d:/trees". If the path gets too long, you'll get mysterious trouble using installBuilder. Some of the installshield executables that
+installBuilder uses choke when run from directories whose names are too long. (Notably, "compile" will complain about bad arguments and return value 256).
+</UL>
+}
+
+ALSO {
+ibCollect.pl,
+ibVerifyCollection.pl,
+ibBuild.pl
+}

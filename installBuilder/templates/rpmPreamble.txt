@@ -1,0 +1,19 @@
+#
+# Template for "Preamble" section of RPM spec files.
+#
+Summary: A Wizzer Works software product.
+Name: wz_sw
+Version: 1.0
+Release: 1
+Copyright:  Copyright (C) 2000 Wizzer Works, Inc. All rights reserved.
+Group: Development
+Source: ftp://ftp.wizzer.com
+URL: http://www.wizzer.com
+Distribution: Linux
+Vendor: Wizzer Works Inc.
+Packager: Mark S. Millard <msm@wizzer.com>
+
+%description
+This software was developed for use with the Wizzer Works multimedia
+technology. For more information, please contact Wizzer Works at 38645
+Chrisholm Place, Fremont CA, 94536.

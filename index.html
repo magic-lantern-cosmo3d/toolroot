@@ -1,0 +1,109 @@
+<html>
+<head>
+<title>Untitled Document</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+</head>
+
+<body bgcolor="#FFFFFF">
+<a href="http://www.wizzer.com/index.htm">Wizzer Works Home Page</a> : <a href="http://www.wizzer.com/swengr/index.htm">Software Engineering</a> : Wizzer Works Toolroot
+<hr>
+<h1 align="center">Wizzer Works Toolroot</h1>
+<p>Author: <b><i>Mark S. Millard</i></b><br>
+  Last Modified: <i><b>April 17, 2000</b></i></p>
+<p>This document discusses a methodology for implementing cross-platform build 
+  environments.</p>
+<p>Contents:<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;<a href="#Section 1.0">1.0 Introduction</a><br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#Section 1.1">1.1 
+  Licensing</a><br>
+  &nbsp;&nbsp;&nbsp;&nbsp;2.0 Tool Dependencies<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2.1 Linux Toolroot Dependencies<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2.2 Windows Toolroot Dependencies<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;<a href="#Section 3.0">3.0 Wizzer Works Tools</a><br>
+  &nbsp;&nbsp;&nbsp;&nbsp;<a href="#Section 4.0">4.0 Makefile Style Guide</a><br>
+  &nbsp;&nbsp;&nbsp;&nbsp;5.0 Software Archictecture Style Guide<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5.1 Directory Hierarchy<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5.2 Data Types<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5.3 OS Independent Wrappers<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5.4. Coding Conventions<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;6.0 Conclusion</p>
+<hr>
+<h2><a name="Section 1.0"></a>1.0 Introduction</h2>
+<p>The Wizzer Works Toolroot is a collection of Makefiles and tools which facilitate 
+  cross-platform development. The Makefiles are designed to support both the C 
+  and C++ programming languages. However, there is no reason why this methodolgy 
+  could not be extended to other programming languages such as Fortran and Java.</p>
+<p>The current version of the Wizzer Works Toolroot supports the Linux and Windows 
+  development platforms. However, this version has not yet been tested on all 
+  flavors of these operating systems. Version 0.5 of the Wizzer Works Toolroot 
+  supports:</p>
+<ul>
+  <li>Redhat Linux 6.0 and 6.1 for ix86 platforms</li>
+  <li>Windows 95/98</li>
+  <li>Windows NT 4.0, Service Pack 4+</li>
+</ul>
+<p>To use this tool suite effectively, some guidelines should be followed in the 
+  way a project is structured. These guidelines are discussed below in <a href="#Section 4.0">Section 
+  4.0, Makefile Style Guide</a>, and <a href="#Section 5.0">Section 5.0, Software 
+  Architecture Style Guide</a>.</p>
+<h3><a name="Section 1.1"></a>1.1 Licensing</h3>
+<p>The Wizzer Works Toolroot is being released under the GNU General Public License, 
+  commonly referred to as the GNU GPL. A copy of the license can be <a href="gpl.txt">read 
+  here</a>.</p>
+<p>For more information concerning the philosphy of the GNU GPL, please refer 
+  to <a href="http://www.gnu.org/philosophy">http://www.gnu.org/philosophy</a>.</p>
+<h2><a name="Section 2.0"></a>2.0 Tool Dependencies</h2>
+<h3><a name="Section 2.1"></a>2.1 Linux Toolroot Dependencies</h3>
+<h3><a name="Section 2.2"></a>2.2 Windows Toolroot Dependencies</h3>
+<h2><a name="Section 3.0"></a>3.0 Wizzer Works Tools</h2>
+<p>The Wizzer Works Toolroot is currently a collection of Makefiles and the <i><b>InstallBuilder</b></i> 
+  tools. The Makefiles are <b><a href="http://www.gnu.org/software/make/make.html">GNU 
+  make</a></b> compliant makefiles. The <i>InstallBuilder</i> tools are three 
+  Perl scripts used for generating installation packages.</p>
+<p>The Makefiles are:</p>
+<ul>
+  <li><a href="include/make/commondefs">commondefs</a> - common Makefile definitions</li>
+  <li><a href="include/make/commonrules">commonrules</a> - common Makefile rules</li>
+  <li><a href="include/make/configurations">configurations</a> - project configurations 
+    (i.e. debug and release)</li>
+  <li><a href="include/make/installdefs">installdefs</a> - installation Makefile 
+    definitions</li>
+  <li><a href="include/make/installrules">installrules</a> - installation Makefile 
+    rules</li>
+  <li><a href="include/make/installversiondefs">installversiondefs</a> - versioning 
+    installation Makefile definitions</li>
+  <li><a href="include/make/installversionrules">installversionrules</a> - versioning 
+    installation Makefile rules</li>
+  <li><a href="include/make/ismcommondefs">ismcommondefs</a> - ISM common Makefile 
+    defintions</li>
+  <li><a href="include/make/ismcommonrules">ismcommonrules</a> - ISM common Makefile 
+    rules</li>
+  <li><a href="include/make/mandefs">mandefs</a> - man documentation Makefile 
+    definitions</li>
+  <li><a href="include/make/manrules">manrules</a> - man documentation Makefile 
+    rules</li>
+</ul>
+<p>The Install Builder tools are:</p>
+<ul>
+  <li><a href="installBuilder/doc/ibCollect.pl.html">ibCollect.pl</a> - a Perl 
+    script for generating a list of files to be included in a distribution package</li>
+  <li><a href="installBuilder/doc/ibVerifyCollection.pl.html">ibVerifyCollection.pl</a> 
+    - a Perl script for verifying the collection of files to be included in a 
+    distribution package against a master list</li>
+  <li><a href="installBuilder/doc/ibBuild.pl.html">ibBuild.pl</a> - a Perl script 
+    for generating a distribution package</li>
+</ul>
+<h2><a name="Section 4.0"></a>4.0 Makefile Style Guide</h2>
+<p>The Makefile Style Guide is an overview of how to use the Wizzer Works Toolroot 
+  to implement a cross-platform project. It discusses the build environment in 
+  the context of several examples.</p>
+<p>The style guide can be <a href="installBuilder/doc/makefileStyleGuide.html">read 
+  here</a>.</p>
+<h2><a name="Section 5.0"></a>5.0 Software Architecture Style Guide</h2>
+<h2><a name="Section 6.0"></a>6.0 Conclusion</h2>
+<hr>
+<p><font size="-2">Last Published: April 17, 2000<br>
+  Contact: <a href="mailto:webmaster@wizzer.com">webmaster@wizzer.com</a></font></p>
+<p>&nbsp;</p>
+</body>
+</html>

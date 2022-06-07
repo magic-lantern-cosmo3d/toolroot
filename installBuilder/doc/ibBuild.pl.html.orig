@@ -1,0 +1,52 @@
+<HTML VERSION="3.0">
+<HEAD>
+<!-- Automatically generated HTML from man page source -->
+<TITLE>ibBuild.pl</TITLE>
+</HEAD>
+<BODY>
+<H3>ibBuild.pl -- </H3>
+<HR>
+<DL>
+<DT><B>NAME</B>
+<DD><B>ibBuild.pl</B> -- collect information about files to be installed on the PC <P>
+<DT><B>SYNOPSIS</B>
+<DD>	perl ibBuild.pl options
+<P>
+<DT><B>DESCRIPTION</B>
+<DD><A HREF="ibBuild.pl.html">ibBuild.pl</A> creates a self-extracting installer for the PC for
+each product description in a given "spec" file, using one or more
+collection files to learn what's in each subsystem.<P><B>-collect collectionFile</B><BR>Specifies a collection file to be used to learn about files.  At least
+one file must be specified.  More than one file may be specified by
+repeating this option.<P><B>-ibDir installBuilderDirectory</B><BR><A HREF="ibBuild.pl.html">ibBuild.pl</A> uses several supporting tools.  Use this option to
+specify where they are located.  If this option is not given and the
+environment variable $IBDIR is set, its value will be used.  The
+installBuilderDirectory must be specified one way or another. (An
+example value is "C:\CosmoDev\installBuilder".)<P><B>-baseDir baseDirectory</B><BR>Entries in the collection files are specified relative to the base
+directory.  If this option is not given and the environment variable
+$IBBASEDIR is set, its value will be used.
+
+<B>-spec specFile</B><BR>Specifies what product specification file to use. This is required.<P><P><B>Specification File Grammar</B><BR>
+
+The spec file format is a poor copy of the SGI spec file format.  The
+following is an extended BNF-style grammar for the file.  (Note: the
+header must be the first line of the file.)<P><DL>
+<DT><I>specFile</I> ::= <DD><I>header</I> <I>productDecl</I>*
+<DT><I>header</I> ::= <DD><B> \#InstallBuilder Spec 1.0 </B>
+<DT><I>productDecl</I> ::= 
+		<DD><B>product</B> <I>productId</I> <I>versionNumber</I><BR><B>uiName</B> restOfLine<BR><B>defaultInstallDir</B> restOfLine<BR><I>subsystem</I>*<BR><B>endproduct</B><BR><DT><I>subsystem</I> ::= 
+		<DD><B>subsys</B> <I>subsysId</I><BR><B>export</B> <I>tag</I>+<BR><B>endsubsys</B><BR><DT><I>productId</I> ::= 
+		<DD> alphanumeric string
+<DT><I>versionNumber</I> ::= <DD> alphanumeric string
+<DT><I>tag</I>           ::= <DD> alphanumeric string
+<DT><I>subsysId</I>      ::= <DD>alphanumeric string
+</DL>
+<P>Note: Because some of the InstallShield programs require 8.3 names,
+tags should be at most 8 characters long.  (This is checked by ibBuild.pl.)<P>Here's a simple spec file example<P><DL>
+<DT>product cosmoToolroot 1.6<BR><DD>uiName Cosmo Development Toolroot<BR>defaultInstallDir CosmoDev<BR><DL><DT>subsys sw<BR><DD>uiName Cosmo Development Executable Tools<BR><DD>export BIN && IB<BR></DL>endsubsys<BR><DL><DT>subsys doc<BR><DD>uiName Cosmo Development Tools Documentation<BR><DD>export DOC<BR></DL>endsubsys<BR></DL>endproduct<BR><P>
+<P>
+<DT><B>SEE ALSO</B>
+<DD>
+<A HREF="InstallBuilder.html">InstallBuilder</A>, <A HREF="ibCollect.pl.html">ibCollect.pl</A>, <A HREF="ibVerifyCollection.pl.html">ibVerifyCollection.pl</A><P>
+</DL>
+</BODY>
+</HTML>

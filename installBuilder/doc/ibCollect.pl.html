@@ -1,0 +1,114 @@
+<!DOCTYPE html PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<html version="3.0">
+<head>
+<meta name="generator" content="HTML Tidy, see www.w3.org">
+<!-- Automatically generated HTML from man page source -->
+<title>ibCollect.pl Document</title>
+</head>
+<body  bgcolor="#FFFFFF">
+<a href="http://www.wizzer.com/index.htm" target="_top">Wizzer Works Home Page</a> 
+: <a href="http://www.wizzer.com/swengr/index.htm">Software Engineering</a> : 
+<a href="http://www.wizzer.com/swengr/toolroot/index.html">Wizzer Works Toolroot</a> :
+ibCollect
+<hr>
+<h3>ibCollect.pl -- Perl Script for Collecting File Distribution Info</h3>
+
+<small>
+<p>
+Author: <b><i>Mark S. Millard</i></b><br>
+Last Modified: <b><i>April 17, 2000</i></b>
+</p>
+</small>
+
+<hr>
+<dl>
+<dt><b>NAME</b></dt>
+
+<p></p>
+
+<dd><b>ibCollect.pl</b> -- collect information about files to be
+installed from a distribution package</dd>
+
+<p></p>
+
+<dt><b>SYNOPSIS</b></dt>
+
+<p></p>
+
+<dd><b>perl</b> ibCollect.pl <i>options file ...</i></dd>
+
+<p></p>
+
+<dt><b>DESCRIPTION</b></dt>
+
+<p></p>
+
+<dd><a href="ibCollect.pl.html">ibCollect.pl</a> appends entries to
+a collection database for later use by <a href="ibBuild.pl.html">
+ibBuild.pl</a>. A collection database entry for a file includes: 
+
+<ul>
+<li>the path of the file to be installed (the source path)</li>
+
+<li>the path it should be installed as,</li>
+
+<li>and any <a href="ibBuild.pl.html">ibBuild.pl</a> "tags" it
+should have.</li>
+</ul>
+
+<br>
+ <b>-destDir destinationDirectory</b><br>
+The destination directory is a relative path from the top directory
+into which the installation image is installed. This must be
+specified.
+
+<p><b>-tags "tagName ..."</b><br>
+Every file should be tagged with one or more installation tags.
+These tags are used to decide which subsystem of your products
+contains the file. (This is similar to idb tags on the SGI.) These
+must be specified.</p>
+
+<p><b>-baseDir baseDirectory</b><br>
+To avoid having absolute pathnames in the collection file. The
+source path is recorded as a relative path from a directory known
+as the <i>base directory</i> (corresponding to <i>install</i>'s SRC
+directory on the SGI). The base directory can be provided with the
+<b>-baseDir</b> option. If this option is not used, <a href= 
+"ibCollect.pl.html">ibCollect.pl</a> tries to get its value from
+the environment variable $IBBASEDIR. The base directory must be
+specified one of these two ways.</p>
+
+<p><b>-srcDir sourceDirectory</b><br>
+Relative source filenames are treated as being relative to
+sourceDirectory. sourceDirectory defaults to the current working
+directory.</p>
+
+<p><b>-dest destinationFileName</b><br>
+Normally, files are installed with the same name as they have in
+your file system. If you want to install them under a different
+name, use the -dest flag to set that name. Note that you must
+specify only one file to use if you use this flag.</p>
+
+<p><b>-q</b><br>
+Runs silently.</p>
+</dd>
+
+<p></p>
+
+<dt><b>SEE ALSO</b></dt>
+
+<p></p>
+
+<dd><a href="installBuilder.html">InstallBuilder</a>, <a href= 
+"ibBuild.pl.html">ibBuild.pl</a>, <a href= 
+"ibVerifyCollection.pl.html">ibVerifyCollection.pl</a></dd>
+</dl>
+
+<hr>
+<small>
+Last Published: <i>April 17, 2000</i><br>
+Contact: <a href="mailto:webmaster@wizzer.com">webmaster@wizzer.com</a>
+</small>
+
+</body>
+</html>

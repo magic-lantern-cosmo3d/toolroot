@@ -1,0 +1,122 @@
+# -*- Makefile -*-
+#
+#  Copyright (C) 2000  Wizzer Works Inc.
+#
+#  This Makefile is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation; either version 2 of the License, or
+#  any later version.
+#
+#  This Makefile is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this Makefile; if not, write to the Free Software
+#  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+#  For information concerning this Makefile, contact Mark S. Millard,
+#  of Wizzer Works Inc. at msm@wizzer.com.
+#
+#*************************************************************************
+#
+# ismcommonrules - rules that should be common to all Makefiles
+# for a particular ISM
+#
+# $Id: ismcommonrules,v 1.1 2004/05/26 19:17:31 msm Exp $
+#
+#*************************************************************************
+
+#
+# Bring in commonrules
+#
+include $(COMMONRULES)
+
+#
+# Create standard target for collect
+#
+ifdef NEED_THISPREF
+collect: $(THISPREF)collect
+endif
+
+#
+# Fakemake rules! :-)
+#
+FAKEMAKERULE = VERSION="$(CUR_VERSION)" \
+	SOURCEFILES="$(SOURCES) $(IDLFILES) $(FM_OTHER_FILES)" \
+	HEADERS="$(HEADERS)" \
+	DEPENDS="$(FM_PROJECT_DEPENDS)" \
+	FOLDERS="$(FM_FOLDERS)" \
+	TARGETS="$(TARGETS)" \
+	ISM_TARGET="$(FAKEMAKE_ISM_TARGET)" \
+	EXCLUDE="$(FM_EXCLUDE)" \
+	VPATH="$(VPATH)" \
+	LEAF_DEPTH="$(LEAF_DEPTH)" \
+	ISM_DEPTH="$(ISM_DEPTH)" \
+	$(FAKEMAKE) $(FAKEDB)
+
+ifdef NEED_THISPREF
+fakemake_collect: $(THISPREF)fakemake_collect
+endif
+
+# Allow subdirectories to skip fakemake collection. This is useful if
+# .dsp files are checked into the tree.
+ifdef SKIP_FAKEMAKE
+$(THISPREF)fakemake_collect:
+	@echo "Skipping fakemake..."
+else
+
+ifdef FAKEMAKE_DEPENDS
+$(THISPREF)fakemake_collect: $(THISPREF)depends
+else
+$(THISPREF)fakemake_collect:
+endif
+	@echo "Collecting FakeMake data."
+	@$(FAKEMAKERULE)
+
+endif
+
+$(FAKEMAKEFILE):
+	@echo "Building fake workspace \"$(FAKEMAKEFILE)\"."
+	@MAKE="$(MAKE)" \
+	MAKE_SHELL="$(SHELL)" \
+	WZDEV_DIR="$(WZDEV_DIR)" \
+	WORKSPACE_NAME="$(FAKEMAKEFILE)" \
+	$(FAKEMAKEBUILD) $(FAKEDB)
+	@$(RM) $(FAKEMAKEFILE:.dsw=.ncb) $(FAKEMAKEFILE:.dsw=.opt)
+
+#
+# Automatic Cocoon documentation rules
+# (makedocs uese the fakemake database to do its work)
+#
+docs: fakemake_collect
+	@echo "Building Documentation."
+	@ISM_NAME="$(ISM_NAME)" \
+	DOC_URLROOT="$(DOC_URLROOT)" \
+	DOC_DESTINATION="$(DOC_DESTINATION)" \
+	DOC_CONFIG_TEMPLATE="$(DOC_CONFIG_TEMPLATE)" \
+	$(MAKEDOCS) $(FAKEDB)
+
+#*************************************************************************
+#
+# rules for automatic version resource generation
+#
+#*************************************************************************
+
+RC_VERSION_RULE = RC_FILE_VERSION="$(RC_FILE_VERSION)" \
+	RC_PRODUCT_VERSION="$(RC_PRODUCT_VERSION)" \
+	RC_VERSION_COMMENT=$(RC_VERSION_COMMENT) \
+	TRADEMARKS=$(ISM_TRADEMARKS) \
+	COPYRIGHT=$(ISM_COPYRIGHT) \
+	IS5PRODUCT="$(IS5PRODUCT)" \
+	TARGETS="$(TARGETS)" \
+	ISM_ALPHANUM="$(ISM_ALPHANUM)" \
+	COMPANY_NAME=$(COMPANY_NAME) \
+	$(RC_VERSION_GENERATOR) $(RC_VERSION_OPTS)
+
+$(RC_VERSION_RC):
+	$(RC_VERSION_RULE)
+
+$(RC_VERSION_RES): $(RC_VERSION_RC)
+	$(RCF) `pwd2`/$(LEAF_DEPTH)/$(RC_VERSION_RC)
