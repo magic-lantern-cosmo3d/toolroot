@@ -23,7 +23,7 @@
 # SOFTWARE.
 #
 #  For information concerning this Makefile, contact Mark S. Millard,
-#  of Wizzer Works Inc. at msm@wizzerworks.com.
+#  of Wizzer Works at msm@wizzerworks.com.
 #
 ###########################################################################
 #
