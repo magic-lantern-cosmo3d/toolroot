@@ -48,7 +48,6 @@ IBCOLLECT = perl -w $(IBDIR)/bin/ibCollect.pl -baseDir $(IBBASEDIR)
 
 SUBDIRS = \
 	linux \
-	powertv \
 	win32 \
 	$(NULL)
 
